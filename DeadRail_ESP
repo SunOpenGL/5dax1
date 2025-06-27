@@ -1,18 +1,8 @@
---[[ 
-ESP: Dead Rails - OcyBux Hub V1.0 (loadstring ready)
-ควบคุมการเปิด/ปิด Highlight ด้วย getgenv().ESPConfig.ShowHighlight (ค่า true/false)
---]]
-
+-- DeadRails_ESP.lua (loadstring)
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local player = Players.LocalPlayer
 local workspace = game:GetService("Workspace")
-
--- กำหนดค่า config เริ่มต้น ถ้ายังไม่มี
-getgenv().ESPConfig = getgenv().ESPConfig or {}
-if getgenv().ESPConfig.ShowHighlight == nil then
-	getgenv().ESPConfig.ShowHighlight = true
-end
 
 local EntityMapping = {
 	Walker = true, Banker = true, Runner = true, ArmoredZombie = true, ZombieMiner = true,
@@ -25,6 +15,7 @@ local EntityMapping = {
 }
 
 local Highlights = {}
+local running = false
 
 local function isValidEnemy(model)
 	if not model:IsA("Model") or model == player.Character then return false end
@@ -52,31 +43,40 @@ local function addESP(model)
 end
 
 local function removeESP(model)
-	local h = Highlights[model]
-	if h then
-		h:Destroy()
+	if Highlights[model] then
+		Highlights[model]:Destroy()
 		Highlights[model] = nil
 	end
 end
 
 local function cleanup()
-	for model, h in pairs(Highlights) do
-		if not model:IsDescendantOf(workspace) or not isValidEnemy(model) or not getgenv().ESPConfig.ShowHighlight then
+	for model, _ in pairs(Highlights) do
+		if not model:IsDescendantOf(workspace) or not isValidEnemy(model) then
 			removeESP(model)
 		end
 	end
 end
 
-task.spawn(function()
-	while true do
-		if getgenv().ESPConfig.ShowHighlight then
+function getgenv().StartESP_Highlight()
+	if running then return end
+	running = true
+	task.spawn(function()
+		while running do
 			for _, obj in ipairs(workspace:GetDescendants()) do
 				if isValidEnemy(obj) then
 					addESP(obj)
 				end
 			end
+			cleanup()
+			task.wait(1)
 		end
-		cleanup()
-		task.wait(1)
+	end)
+end
+
+function getgenv().StopESP_Highlight()
+	running = false
+	for model, h in pairs(Highlights) do
+		h:Destroy()
 	end
-end)
+	table.clear(Highlights)
+end
