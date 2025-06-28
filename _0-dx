@@ -1,0 +1,1828 @@
+--Main Script for OcyBux Hub V1.0 [Dead Rails รางตาย]
+if getgenv()._OcyBuxHUB then return end
+getgenv()._OcyBuxHUB = true
+if not game:IsLoaded() then game.Loaded:Wait() end
+if not game:IsLoaded() then
+	repeat task.wait() until game:IsLoaded()
+end
+local validatedOnce = false
+local expectedUrl = "https://raw.githubusercontent.com/SUNRTX22/beekar/refs/heads/Showpopup/Auto%20Rejoin%20farm%20bound"
+local realDestroy = cloneref and cloneref(Instance.new("Folder")).Destroy or Instance.Destroy
+local realKick = cloneref and cloneref(game:GetService("Players").LocalPlayer).Kick or game:GetService("Players").LocalPlayer.Kick
+local realShutdown = game.Shutdown
+local realGetChildren = game.GetChildren
+local function deepPurgeAndKick()
+	local function wipe(container)
+		for _, obj in ipairs(realGetChildren(container)) do
+			pcall(function()
+				if obj:IsA("Instance") and not obj:IsA("Player") then
+					realDestroy(obj)
+				end
+			end)
+		end
+	end
+	for _, serviceName in ipairs({
+		"Workspace", "Lighting", "Players", "ReplicatedStorage",
+		"StarterGui", "StarterPack", "StarterPlayer", "SoundService",
+		"Chat", "TextChatService", "CoreGui"
+	}) do
+		pcall(function()
+			wipe(game:GetService(serviceName))
+		end)
+	end
+	local lp = game:GetService("Players").LocalPlayer
+	local cam = workspace.CurrentCamera
+	pcall(function()
+		cam.CameraSubject = nil
+		cam.CameraType = Enum.CameraType.Scriptable
+	end)
+	pcall(function()
+		realKick(lp, "❌ Unauthorized execution. Game wiped.")
+	end)
+	task.delay(0.1, function()
+		pcall(function()
+			realShutdown(game)
+		end)
+	end)
+end
+local function validateLoaderInfo()
+	if validatedOnce then return end
+
+	local info = rawget(getgenv(), "_OcyBuxHUB_DayToDay2044")
+	if type(info) ~= "table" or info.url ~= expectedUrl or type(info.marker) ~= "userdata" then
+		pcall(deepPurgeAndKick)
+		return
+	end
+	validatedOnce = true
+	if getgenv()._fromLoader then
+		getgenv()._fromLoader.marker = nil
+	end
+end
+validateLoaderInfo()
+task.spawn(function()
+	while not validatedOnce do
+		task.wait(0.1)
+		validateLoaderInfo()
+	end
+end)
+
+local allowedPlaceIds = {
+	[70876832253163] = true,
+	[116495829188952] = true
+}
+loadstring(game:HttpGet("https://raw.githubusercontent.com/SUNRTX22/beekar/refs/heads/Showpopup/Showpupup"))()
+if not allowedPlaceIds[game.PlaceId] then
+	getgenv().ShowPopup({
+		Title = "สคริปต์นี้ไม่รองรับกับแมพที่คุณเล่น :(",
+		Content = "สคริปต์นี้รองรับแค่แมพ Dead Rails! :(\nBy DayToDay2044",
+		Box_X = 450,
+		Box_Y = 150,
+		Delay = 5,
+		Draggable = false,
+		OnSmooth = 0.4,
+		OffSmooth = 0.5,
+		Titlepx = 22,
+		Contentpx = 19
+	})
+	return
+end
+local InsertService = game:GetService("InsertService")
+local ReGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/depthso/Dear-ReGui/refs/heads/main/ReGui.lua'))()
+local PrefabsId = "rbxassetid://" .. ReGui.PrefabsId
+ReGui:Init({
+	Prefabs = InsertService:LoadLocalAsset(PrefabsId)
+})
+ReGui:DefineTheme("Cherry", {
+    TextSize = 18,
+	TitleAlign = Enum.TextXAlignment.Center,
+	Text = Color3.fromRGB(235, 220, 190),
+	TextDisabled = Color3.fromRGB(140, 120, 100),
+    FrameBg = Color3.fromRGB(1, 1, 1),
+	FrameBgTransparency = 0.1,
+	FrameBgActive = Color3.fromRGB(70, 50, 30),
+	FrameBgTransparencyActive = 0.1,
+	CheckMark = Color3.fromRGB(255, 190, 80),
+	SliderGrab = Color3.fromRGB(255, 150, 60),
+	ButtonsBg = Color3.fromRGB(190, 110, 40),
+    CollapsingHeaderBg = Color3.fromRGB(255, 0, 0),
+	CollapsingHeaderText = Color3.fromRGB(255, 220, 180),
+	RadioButtonHoveredBg = Color3.fromRGB(255, 170, 60),
+	WindowBg = Color3.fromRGB(30, 20, 15),
+	TitleBarBg = Color3.fromRGB(50, 30, 20),
+	TitleBarBgActive = Color3.fromRGB(90, 50, 30),
+	Border = Color3.fromRGB(255, 160, 100),
+	ResizeGrab = Color3.fromRGB(80, 255, 80),
+	RegionBg = Color3.fromRGB(60, 40, 25),
+	RegionBgTransparency = 0.2,
+})
+local defaultSize = isMobile and UDim2.new(0, 300, 0, 220) or UDim2.new(0, 600, 0, 400)
+local Window = ReGui:Window({
+	Title = "OcyBux Hub V1.0 [Dead Rails รางตาย]",
+	Theme = "Cherry",
+	NoClose = false,
+	Size = defaultSize,
+}):Center()
+getgenv().ExistingWindow = Window
+local Group = Window:List({
+	UiPadding = 2,
+	HorizontalFlex = Enum.UIFlexAlignment.Fill,
+})
+local TabsBar = Group:List({
+	Border = true,
+	UiPadding = 5,
+	BorderColor = Window:GetThemeKey("Border"),
+	BorderThickness = 1,
+	HorizontalFlex = Enum.UIFlexAlignment.Fill,
+	HorizontalAlignment = Enum.HorizontalAlignment.Center,
+	AutomaticSize = Enum.AutomaticSize.None,
+	FlexMode = Enum.UIFlexMode.None,
+	Size = UDim2.new(0, 40, 1, 0),
+	CornerRadius = UDim.new(0, 5)
+})
+local TabSelector = Group:TabSelector({
+	NoTabsBar = true,
+	Size = UDim2.fromScale(0.5, 1)
+})
+local function CreateTab(Name: string, Icon)
+	local Tab = TabSelector:CreateTab({
+		Name = Name
+	})
+	local List = Tab:List({
+		HorizontalFlex = Enum.UIFlexAlignment.Fill,
+		UiPadding = 1,
+		Spacing = 10
+	})
+	local Button = TabsBar:Image({
+		Image = Icon,
+		Ratio = 1,
+		RatioAxis = Enum.DominantAxis.Width,
+		Size = UDim2.fromScale(1, 1),
+		Callback = function(self)
+			TabSelector:SetActiveTab(Tab)
+		end,
+	})
+	ReGui:SetItemTooltip(Button, function(Canvas)
+		Canvas:Label({
+			Text = Name
+		})
+	end)
+	return List
+end
+local function CreateRegion(Parent, Title)
+	local Region = Parent:Region({
+		Border = true,
+		BorderColor = Window:GetThemeKey("Border"),
+		BorderThickness = 1,
+		CornerRadius = UDim.new(0, 5)
+	})
+	Region:Label({
+		Text = Title
+	})
+	return Region
+end
+--// Services
+local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UIS = game:GetService("UserInputService")
+local CAS = game:GetService("ContextActionService")
+local VIM = game:GetService("VirtualInputManager")
+local Lighting = game:GetService("Lighting")
+local HttpService = game:GetService("HttpService")
+
+--// Player & Camera
+local player = Players.LocalPlayer
+local backpack = player:WaitForChild("Backpack")
+local Camera = workspace.CurrentCamera
+local LocalPlayer = player
+
+--// Remotes
+local function safeRemote(path)
+	local current = ReplicatedStorage
+	for part in string.gmatch(path, "[^%.]+") do
+		current = current:FindFirstChild(part)
+		if not current then return nil end
+	end
+	return current
+end
+
+local StoreItem    = safeRemote("Remotes.StoreItem")
+local ShootRemote  = safeRemote("Remotes.Weapon.Shoot")
+local ReloadRemote = safeRemote("Remotes.Weapon.Reload")
+local SwingMelee   = safeRemote("Shared.Network.RemoteEvent.SwingMelee")
+--local WeaponController = require(ReplicatedStorage:WaitForChild("Client"):WaitForChild("Controllers"):WaitForChild("WeaponController"))
+
+--// Default Camera/Mouse Settings
+local DEFAULT_MOUSE_BEHAVIOR = Enum.MouseBehavior.LockCenter
+local DEFAULT_MOUSE_ICON     = true
+local DEFAULT_CAMERA_TYPE    = Enum.CameraType.Custom
+local DEFAULT_CAMERA_MODE    = Enum.CameraMode.LockFirstPerson
+local DEFAULT_ZOOM_MIN      = 0.5
+local DEFAULT_ZOOM_MAX      = 10
+
+--// State Variables
+local unlockCamEnabled, unlockMouseEnabled, unlockShiftLockEnabled = false, false, false
+local isForceSetMouse, isForceSetShiftLock = false, false
+local noSpreadEnabled, noRecoilEnabled, rapidFireEnabled, isForceSet = false, false, false, false
+local showCrosshairEnabled, isGunMasterEnabled = false, false
+
+--// Auto Pickup/Attack
+local autoAttackEnabled = false
+local autoPickupEnabled, autoEquipSackEnabled = false, false
+local dontPickupCorpse, checkWallEnabled = false, false
+local dontKillHorse_Gun, dontKillHorse_Melee = true, false
+local isAutoKillFromCombo , autoAimEnabled, autoReloadEnabled = false, false, false
+local SINK_SHOOT_ACTION, isHooked = "SinkMouse1Shoot", false
+
+--// UI/Highlight
+local showGunHighlight, showHighlightOnProximity = true, true
+local highlightInstance, currentHighlightTarget = nil, nil
+local aimLockMode, lastTarget = "ล็อคตลอด", nil
+
+--// Tool/Weapon
+local lastEquippedTool = nil
+local originalReloadTimes = {}
+local reloadInstantEnabled = false
+local lastAnimTime = 0
+--local showFovCircle = false
+local fovCircleRadius = 150
+local animCooldown = 0.4
+local autoKillRadiobox, lockAimRadiobox, showHighlightRadiobox, showFovRadiobox
+
+--// Camera/Zoom
+local originalCameraMode = player.CameraMode
+local originalMinZoom = player.CameraMinZoomDistance
+local originalMaxZoom = player.CameraMaxZoomDistance
+local unlockMouseRadiobox
+local defaultFunctional = nil
+if workspace:FindFirstChild("default") then
+	defaultFunctional = workspace.default:FindFirstChild("Functional")
+end
+local WeaponController = nil
+local originalFireBullet = nil
+local success, result = pcall(function()
+	local controllers = ReplicatedStorage:WaitForChild("Client"):FindFirstChild("Controllers")
+	if controllers and controllers:FindFirstChild("WeaponController") then
+		WeaponController = require(controllers.WeaponController)
+		originalFireBullet = WeaponController.FireBullet
+	end
+end)
+local originalSizes = {}
+--// Misc
+local shiftlockRadiobox, scanSlider = nil, nil
+local killRange, GunKillRange, AimbotLock = 100, 100, 500
+local aimAssistFollow = false
+
+--// Constants
+local AUTO_PICKUP_RADIUS = 15
+
+--// Entity Mapping & Blacklists
+local EntityMapping = {
+	Walker = true, Banker = true, Runner = true, ArmoredZombie = true, ZombieMiner = true, ZombieSheriff = true,
+	CaptainPrescott = true, ZombieUnarmedSoldier = true, ZombieRevolverOfficer = true, ZombieRevolverSoldier = true,
+	ZombieSwordOfficer = true, Horse = true, Unicorn = true, Wolf = true, RevolverOutlaw = true, ShotgunOutlaw = true,
+	RifleOutlaw = true, TurretOutlaw = true, Vampire = true, Werewolf = true, NikolaTesla = true, EasterBunny = true,
+	SkeletonMiner = true, CovenantArcher = true, CovenantKnight = true, Goliath = true,
+}
+local EntityBlacklist = {
+	RifleSoldier = true, TurretSoldier = true
+}
+local ESP_EntityMapping = {
+	Walker = true, Banker = true, Runner = true, ArmoredZombie = true, ZombieMiner = true, ZombieSheriff = true,
+	CaptainPrescott = true, ZombieUnarmedSoldier = true, ZombieRevolverOfficer = true, ZombieRevolverSoldier = true,
+	ZombieSwordOfficer = true, Horse = true, Unicorn = true, Wolf = true, RevolverOutlaw = true, ShotgunOutlaw = true,
+	RifleOutlaw = true, TurretOutlaw = true, Vampire = true, Werewolf = true, NikolaTesla = true, EasterBunny = true,
+	SkeletonMiner = true, CovenantArcher = true, CovenantKnight = true, Goliath = true,RifleSoldier = true, TurretSoldier = true,
+}
+local GunMapping = {
+	["Navy Revolver"] = true, Revolver = true, Rifle = true, Shotgun = true, ["Sawed-Off Shotgun"] = true,
+	Crossbow = true, ["Elephant Rifle"] = true, Mauser = true, Electrocutioner = true, Blunderbuss = true,
+	["Bolt Action Rifle"] = true,
+}
+local highlightInstances = { melee = nil, gun = nil }
+local blacklistedEntityNames = {
+	Walker = true, ZombieSheriff = true, Runner = true, ArmoredZombie = true, Werewolf = true, Wolf = true,
+	CovenantArcher = true, CovenantKnight = true, Goliath = true, ShotgunOutlaw = true, RifleOutlaw = true,
+	RevolverOutlaw = true, Banker = true, SkeletonMiner = true, ZombieMiner = true, ZombieRevolverOfficer = true,
+	ZombieRevolverSoldier = true, ZombieSwordOfficer = true, ZombieUnarmedSoldier = true, Vampire = true,
+}
+local aimLockModesMap = {
+	["1.ล็อคตลอด"] = "ล็อคตลอด",
+	["2.รอการคลิ๊กขาวค้าง [PC]"] = "รอการคลิ๊กขาวค้าง [PC]",
+	["3.ล็อคแบบกล้องวาปไปหาศัตรู"] = "ล็อคแบบกล้องวาปไปหาศัตรู",
+	["4.ยิงตรงไหนก็โดน [โหมดที่ 1]"] = "ยิงตรงไหนก็โดน [โหมดที่ 1]",
+	["5.ยิงตรงไหนก็โดน [โหมดที่ 2]"] = "ยิงตรงไหนก็โดน [โหมดที่ 2]",
+	["6.ฆ่าออโต้สุดโหด"] = "ฆ่าออโต้สุดโหด"
+}
+local Clip = true
+local Noclipping = nil
+local floatName = "HumanoidRootPart" 
+local activeCombatMode = nil
+local espObjects = {}
+local isTrainAuraEnabled = false
+getgenv()._ESP_Enabled = false
+getgenv().espMode = "2D" -- หรือ "3D", "Corner"
+getgenv().showESP = false -- เปิด/ปิดกรอบ
+getgenv().showLineESP = false -- เปิด/ปิดเส้น
+getgenv().lineMode = "Top" -- "Top", "Bottom", "Center"
+getgenv().showHealthBar = false
+getgenv().showItemESP = getgenv().showItemESP or false
+
+
+local function isValidESPEnemy(model)
+	if not model:IsA("Model") then return false end
+	if Players:GetPlayerFromCharacter(model) then return false end
+	local entityName = model:GetAttribute("EntityName")
+	if not entityName then return false end
+	if not ESP_EntityMapping[entityName] then return false end
+	if not model:FindFirstChild("Humanoid") then return false end
+	if not model:FindFirstChild("HumanoidRootPart") then return false end
+	if model.Humanoid.Health <= 0 then return false end
+	return true
+end
+local function isValidESPItem(inst)
+	if not inst:IsA("Model") then return false end
+	if inst.Parent ~= workspace:FindFirstChild("RuntimeItems") then return false end
+	local hasEntityName = inst:GetAttribute("EntityName") ~= nil
+	local hasHead = inst:FindFirstChild("Head") ~= nil
+	local isEnemy = inst.Name:match("^Model_") and hasEntityName and hasHead
+	local isObject = not hasEntityName and not hasHead and inst.PrimaryPart
+	return isEnemy or isObject
+end
+local function getBodyColor(model)
+	local bodyColors = model:FindFirstChild("Body Colors")
+	if bodyColors and bodyColors:IsA("BodyColors") then
+		return bodyColors.TorsoColor3
+	end
+	return Color3.fromRGB(255, 0, 0) 
+end
+local function getRainbowColor()
+	local t = tick()
+	return Color3.fromHSV((t * 0.2) % 1, 1, 1)
+end
+local function updateItemESP(item)
+	if item:FindFirstChild("ESP_Highlight") then return end
+	local cam = workspace.CurrentCamera
+	local part = item:FindFirstChild("Handle") or item:FindFirstChild("PrimaryPart") or item:FindFirstChild("Main") or item:FindFirstChildWhichIsA("BasePart")
+	if not part then return end
+	local pos, onScreen = cam:WorldToViewportPoint(part.Position)
+	if not onScreen then return end
+	local highlight = Instance.new("Highlight")
+	highlight.Adornee = item
+	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+	highlight.FillTransparency = 1
+	highlight.OutlineTransparency = 0
+	highlight.OutlineColor = getRainbowColor()
+	highlight.Name = "ESP_Highlight"
+	highlight.Parent = item
+	table.insert(espObjects, highlight)
+	local displayName = item:GetAttribute("EntityName") or item.Name:gsub("^Model_", "")
+	local text = Drawing.new("Text")
+	text.Text = displayName
+	text.Size = 14
+	text.Font = 2
+	text.Color = getRainbowColor()
+	text.Outline = true
+	text.Center = true
+	text.Position = Vector2.new(pos.X, pos.Y - 16)
+	text.Visible = true
+	table.insert(espObjects, text)
+end
+local function updateNPCESP_BOX(model)
+	local hrp = model:FindFirstChild("HumanoidRootPart")
+	local hum = model:FindFirstChild("Humanoid")
+	if not hrp or not hum or hum.Health <= 0 then return end
+	local espColor = getBodyColor(model) 
+	local size = model:GetExtentsSize()
+	local cf = hrp.CFrame
+	local cam = workspace.CurrentCamera
+	local top, onScreenTop = cam:WorldToViewportPoint(cf.Position + Vector3.new(0, size.Y / 2, 0))
+	local bottom, onScreenBottom = cam:WorldToViewportPoint(cf.Position - Vector3.new(0, size.Y / 2, 0))
+	if not (onScreenTop and onScreenBottom) then return end
+	local height = bottom.Y - top.Y
+	local width = height * 0.6
+	local topLeft = Vector2.new(top.X - width / 2, top.Y)
+	if getgenv().espMode == "2D" then
+		local box = Drawing.new("Square")
+		box.Size = Vector2.new(width, height)
+		box.Position = topLeft
+		box.Color = espColor
+		box.Thickness = 1
+		box.Visible = true
+		table.insert(espObjects, box)
+	end
+	if getgenv().espMode == "Corner" then
+		local l = width * 0.25
+		local t = height * 0.25
+		local points = {
+			{from = topLeft, to = topLeft + Vector2.new(l, 0)},
+			{from = topLeft, to = topLeft + Vector2.new(0, t)},
+			{from = topLeft + Vector2.new(width, 0), to = topLeft + Vector2.new(width - l, 0)},
+			{from = topLeft + Vector2.new(width, 0), to = topLeft + Vector2.new(width, t)},
+			{from = topLeft + Vector2.new(0, height), to = topLeft + Vector2.new(0, height - t)},
+			{from = topLeft + Vector2.new(0, height), to = topLeft + Vector2.new(l, height)},
+			{from = topLeft + Vector2.new(width, height), to = topLeft + Vector2.new(width - l, height)},
+			{from = topLeft + Vector2.new(width, height), to = topLeft + Vector2.new(width, height - t)},
+		}
+		for _, p in ipairs(points) do
+			local line = Drawing.new("Line")
+			line.From = p.from
+			line.To = p.to
+			line.Color = espColor
+			line.Thickness = 1
+			line.Visible = true
+			table.insert(espObjects, line)
+		end
+	end
+	if getgenv().espMode == "3D" then
+		local function w2s(v3)
+			local pos, onScreen = cam:WorldToViewportPoint(v3)
+			return Vector2.new(pos.X, pos.Y), onScreen, pos.Z
+		end
+		local ext = size / 2
+		local corners = {}
+		for x = -1, 1, 2 do
+			for y = -1, 1, 2 do
+				for z = -1, 1, 2 do
+					table.insert(corners, cf.Position + (cf.RightVector * ext.X * x) + (cf.UpVector * ext.Y * y) + (cf.LookVector * ext.Z * z))
+				end
+			end
+		end
+		local lines = {
+			{1, 2}, {2, 4}, {4, 3}, {3, 1}, -- bottom
+			{5, 6}, {6, 8}, {8, 7}, {7, 5}, -- top
+			{1, 5}, {2, 6}, {3, 7}, {4, 8}, -- vertical
+		}
+		for _, edge in ipairs(lines) do
+			local p1, ons1 = w2s(corners[edge[1]])
+			local p2, ons2 = w2s(corners[edge[2]])
+			if ons1 and ons2 then
+				local line = Drawing.new("Line")
+				line.From = p1
+				line.To = p2
+				line.Color = espColor
+				line.Thickness = 1
+				line.Visible = true
+				table.insert(espObjects, line)
+			end
+		end
+	end
+end
+local function updateNPCESP_LINE(model)
+	if not getgenv().showLineESP then return end
+	local hrp = model:FindFirstChild("HumanoidRootPart")
+	local hum = model:FindFirstChild("Humanoid")
+	if not hrp or not hum or hum.Health <= 0 then return end
+	local espColor = getBodyColor(model)
+	local cam = workspace.CurrentCamera
+	local pos, onScreen = cam:WorldToViewportPoint(hrp.Position)
+	if not onScreen then return end
+	local fromY = (getgenv().lineMode == "Top" and 0)
+		or (getgenv().lineMode == "Bottom" and cam.ViewportSize.Y)
+		or (cam.ViewportSize.Y / 2)
+	local line = Drawing.new("Line")
+	line.From = Vector2.new(cam.ViewportSize.X / 2, fromY)
+	line.To = Vector2.new(pos.X, pos.Y)
+	line.Color = espColor
+	line.Thickness = 1
+	line.Visible = true
+	table.insert(espObjects, line)
+end
+local function updateNPCESP_HEALTH(model)
+	local hrp = model:FindFirstChild("HumanoidRootPart")
+	local hum = model:FindFirstChild("Humanoid")
+	if not hrp or not hum or hum.Health <= 0 then return end
+	local cam = workspace.CurrentCamera
+	local size = model:GetExtentsSize()
+	local cf = hrp.CFrame
+	local top, onScreenTop = cam:WorldToViewportPoint(cf.Position + Vector3.new(0, size.Y / 2, 0))
+	local bottom, onScreenBottom = cam:WorldToViewportPoint(cf.Position - Vector3.new(0, size.Y / 2, 0))
+	if not (onScreenTop and onScreenBottom) then return end
+	local height = bottom.Y - top.Y
+	local barHeight = height * 0.8
+	local barWidth = 4
+	local boxX = top.X - (height * 0.6) / 2 
+	local barX = boxX - barWidth - 2
+	local barY = top.Y + (height - barHeight) / 2
+	local healthPercent = hum.Health / hum.MaxHealth
+	local background = Drawing.new("Square")
+	background.Size = Vector2.new(barWidth, barHeight)
+	background.Position = Vector2.new(barX, barY)
+	background.Color = Color3.fromRGB(0, 0, 0)
+	background.Filled = true
+	background.Visible = true
+	table.insert(espObjects, background)
+	local fillHeight = barHeight * healthPercent
+	local fillY = barY + (barHeight - fillHeight)
+	local fill = Drawing.new("Square")
+	fill.Size = Vector2.new(barWidth, fillHeight)
+	fill.Position = Vector2.new(barX, fillY)
+	fill.Color = Color3.fromRGB(255 - 255 * healthPercent, 255 * healthPercent, 0)
+	fill.Filled = true
+	fill.Visible = true
+	table.insert(espObjects, fill)
+	local hpText = math.floor(healthPercent * 100) .. "%"
+	local hpColor = Color3.fromRGB(
+		math.floor(255 - (healthPercent * 255)),
+		math.floor(healthPercent * 255),
+		0
+	)
+	local text = Drawing.new("Text")
+	text.Text = hpText
+	text.Size = 14
+	text.Font = 2
+	text.Color = hpColor
+	text.Outline = true
+	text.Center = true
+	text.Position = Vector2.new(barX + barWidth + 20, fillY + fillHeight - 10)
+	text.Visible = true
+	table.insert(espObjects, text)
+end
+local function updateNPCESP_NAME(model)
+	local hrp = model:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	local cam = workspace.CurrentCamera
+	local pos, onScreen = cam:WorldToViewportPoint(hrp.Position + Vector3.new(0, 3, 0)) -- ยกขึ้นหน่อย
+	if not onScreen then return end
+	local name = model.Name:gsub("^Model_", "")
+	local text = Drawing.new("Text")
+	text.Text = name
+	text.Size = 14
+	text.Font = 2
+	text.Color = Color3.fromRGB(255, 255, 255)
+	text.Outline = true
+	text.Center = true
+	text.Position = Vector2.new(pos.X, pos.Y)
+	text.Visible = true
+	table.insert(espObjects, text)
+end
+local function clearESP()
+	for _, obj in ipairs(espObjects) do
+		if obj and obj.Remove then
+			obj:Remove()
+		end
+	end
+	table.clear(espObjects)
+end
+
+local function getHRP()
+	local char = player.Character or player.CharacterAdded:Wait()
+	return char:FindFirstChild("HumanoidRootPart")
+end
+local function isHoldingSack()
+	local char = player.Character
+	return char and char:FindFirstChild("Sack") ~= nil
+end
+local function isInRange(obj)
+	if not obj:IsA("Model") then return false end
+	local part = obj:FindFirstChild("PrimaryPart") or obj:FindFirstChildWhichIsA("BasePart")
+	local hrp = getHRP()
+	if not part or not hrp then return false end
+	return (hrp.Position - part.Position).Magnitude <= AUTO_PICKUP_RADIUS
+end
+local function isSackFull()
+	local sack = backpack:FindFirstChild("Sack") or player.Character and player.Character:FindFirstChild("Sack")
+	if not sack then return false end
+	local bb = sack:FindFirstChild("BillboardGui")
+	if not bb then return false end
+	local label = bb:FindFirstChild("TextLabel")
+	if not label then return false end
+	local current, max = label.Text:match("^(%d+)%s*/%s*(%d+)$")
+	if not current or not max then return false end
+	return tonumber(current) >= tonumber(max)
+end
+local function isCorpseBlacklisted(item)
+	if not dontPickupCorpse then return false end
+	local entityName = item:GetAttribute("EntityName")
+	return entityName and blacklistedEntityNames[entityName]
+end
+local function equipSackIfNeeded()
+	local char = player.Character
+	if not char then return end
+	if isHoldingSack() then return end
+	local toolEquipped = char:FindFirstChildOfClass("Tool")
+	if toolEquipped and toolEquipped.Name ~= "Sack" then
+		lastEquippedTool = toolEquipped.Name
+		toolEquipped.Parent = backpack
+	end
+	local sackTool = backpack:FindFirstChild("Sack")
+	if sackTool then
+		sackTool.Parent = char
+	end
+end
+local function restoreTool()
+	local char = player.Character
+	if not char then return end
+	local sack = char:FindFirstChild("Sack")
+	if sack then
+		sack.Parent = backpack
+	end
+	if lastEquippedTool then
+		local toolToRestore = backpack:FindFirstChild(lastEquippedTool)
+		if toolToRestore then
+			for _, tool in ipairs(char:GetChildren()) do
+				if tool:IsA("Tool") then
+					tool.Parent = backpack
+				end
+			end
+			toolToRestore.Parent = char
+		end
+	end
+	lastEquippedTool = nil
+end
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if autoPickupEnabled then
+            local nearbyItem = nil
+            for _, item in ipairs(workspace:WaitForChild("RuntimeItems"):GetChildren()) do
+                if isInRange(item) and not isCorpseBlacklisted(item) then
+                    nearbyItem = item
+                    break
+                end
+            end
+            if nearbyItem and not isSackFull() then
+                if autoEquipSackEnabled and not isHoldingSack() then
+                    equipSackIfNeeded()
+                    task.wait(0.1)
+                end
+                if isHoldingSack() then
+                    pcall(function()
+                        StoreItem:FireServer(nearbyItem)
+                    end)
+                    task.wait(0.1)
+                    if autoEquipSackEnabled then
+                        restoreTool()
+                    end
+                end
+            end
+        end
+    end
+end)
+local function findEquippedWeapon()
+	local char = player.Character
+	if not char then return nil end
+	for _, tool in ipairs(char:GetChildren()) do
+		if tool:IsA("Tool") and tool:GetAttribute("client_last_attack_time") then
+			return tool
+		end
+	end
+	return nil
+end
+local function isValidEnemy(model, isMelee, isGun)
+	if not model:IsA("Model") then return false end
+	if model == player.Character then return false end
+	if Players:GetPlayerFromCharacter(model) then return false end
+	local entityName = model:GetAttribute("EntityName")
+	if not entityName then return false end
+	if EntityBlacklist[entityName] then return false end
+	if not EntityMapping[entityName] then return false end
+	if (entityName == "Horse" or entityName == "Unicorn") then
+		if (isGun and dontKillHorse_Gun) or (isMelee and dontKillHorse_Melee) then
+			return false
+		end
+	end
+	if not model:FindFirstChild("Humanoid") then return false end
+	if not model:FindFirstChild("HumanoidRootPart") then return false end
+	if model.Humanoid.Health <= 0 then return false end
+	return true
+end
+local function isOnScreenAndInFov(part)
+	if not showFovCircle then return true end
+	local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
+	if tool and tool:GetAttribute("client_last_attack_time") and not GunMapping[tool.Name] then
+		return true
+	end
+	local cam = workspace.CurrentCamera
+	local screenPos, onScreen = cam:WorldToViewportPoint(part.Position)
+	if not onScreen then return false end
+	local screenCenter = cam.ViewportSize / 2
+	local distFromCenter = (Vector2.new(screenPos.X, screenPos.Y) - screenCenter).Magnitude
+	return distFromCenter <= fovCircleRadius
+end
+local function isVisible(targetPart)
+	local cam = workspace.CurrentCamera
+	local origin = cam.CFrame.Position
+	local direction = (targetPart.Position - origin)
+	local rayParams = RaycastParams.new()
+	rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+	rayParams.FilterDescendantsInstances = {player.Character}
+	rayParams.IgnoreWater = true
+	local result = workspace:Raycast(origin, direction, rayParams)
+	if result then
+		local hit = result.Instance
+		if hit:IsDescendantOf(targetPart.Parent) then
+			return true
+		end
+	end
+	return false
+end
+local function getNearestEnemy(maxRange, isMelee, isGun)
+	local char = player.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+	if not hrp then return nil end
+	local nearest, shortestDist = nil, maxRange
+	for _, obj in ipairs(workspace:GetDescendants()) do
+		if isValidEnemy(obj, isMelee, isGun) then
+			local targetPart = obj:FindFirstChild("HumanoidRootPart")
+			if not targetPart then continue end
+			local dist = (targetPart.Position - hrp.Position).Magnitude
+			local inFov = isOnScreenAndInFov(targetPart)
+			local canSee = not checkWallEnabled or isVisible(targetPart)
+			if dist <= shortestDist and inFov and canSee then
+				nearest = obj
+				shortestDist = dist
+			end
+		end
+	end
+	return nearest
+end
+local function tryPlaySwingAnimation(weapon)
+	if not playWeaponSwingAnimation then return end
+	if tick() - lastAnimTime < animCooldown then return end
+	lastAnimTime = tick()
+	local animFolder = weapon:FindFirstChild("Configuration") and weapon.Configuration:FindFirstChild("Animations")
+	if not animFolder then return end
+	local chargedAnim = animFolder:FindFirstChild("ChargedSwingAnimation")
+	local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+	if humanoid and chargedAnim then
+		local track = humanoid:LoadAnimation(chargedAnim)
+		track:Play()
+	end
+end
+local function applyHighlight(target, mode)
+	if not target or not target:IsA("Model") then return end
+	if highlightInstances[mode] then
+		highlightInstances[mode]:Destroy()
+		highlightInstances[mode] = nil
+	end
+	local hrp = target:FindFirstChild("HumanoidRootPart")
+	if hrp then
+		local highlight = Instance.new("Highlight")
+		highlight.Adornee = target
+		highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+		highlight.Parent = target
+		highlightInstances[mode] = highlight
+		task.spawn(function()
+			while highlightInstances[mode] == highlight and target and target.Parent do
+				local hue = tick() % 5 / 5
+				local rainbowColor = Color3.fromHSV(hue, 1, 1)
+				highlight.FillColor = rainbowColor
+				task.wait(0.03)
+			end
+		end)
+	end
+end
+local function removeHighlight(mode)
+	if mode == nil then
+		for k, v in pairs(highlightInstances) do
+			if v then
+				v:Destroy()
+				highlightInstances[k] = nil
+			end
+		end
+		return
+	end
+	if highlightInstances[mode] then
+		highlightInstances[mode]:Destroy()
+		highlightInstances[mode] = nil
+	end
+end
+local function tryAttackNearest()
+	local weapon = findEquippedWeapon()
+	if not weapon then return end
+	local target = getNearestEnemy(12, true, false) 
+	if not target then 
+		removeHighlight()
+		return 
+	end
+	SwingMelee:FireServer(
+		weapon,
+		500,
+		Vector3.new(0, 0, -1)
+	)
+	tryPlaySwingAnimation(weapon)
+	if showHighlightOnProximity then
+		applyHighlight(target, "melee")
+	else
+		removeHighlight("melee")
+	end
+end
+local function setCameraUnlocked()
+	local player = game:GetService("Players").LocalPlayer
+	local cam = workspace.CurrentCamera
+	cam.CameraType = Enum.CameraType.Custom
+	cam.CameraSubject = player.Character:WaitForChild("Humanoid")
+	player.CameraMode = Enum.CameraMode.Classic
+	player.CameraMinZoomDistance = 0.5
+	player.CameraMaxZoomDistance = 128
+    player.CameraMode = Enum.CameraMode.Classic
+end
+local function resetCameraToDefault()
+	local player = game:GetService("Players").LocalPlayer
+	local cam = workspace.CurrentCamera
+	cam.CameraType = DEFAULT_CAMERA_TYPE
+	cam.CameraSubject = player.Character:WaitForChild("Humanoid")
+	player.CameraMode = DEFAULT_CAMERA_MODE
+	player.CameraMinZoomDistance = DEFAULT_ZOOM_MIN
+	player.CameraMaxZoomDistance = DEFAULT_ZOOM_MAX
+	game:GetService("UserInputService").MouseBehavior = DEFAULT_MOUSE_BEHAVIOR
+	game:GetService("UserInputService").MouseIconEnabled = DEFAULT_MOUSE_ICON
+end
+local crosshairGui = Instance.new("ScreenGui")
+crosshairGui.Name = "CrosshairUI"
+crosshairGui.ResetOnSpawn = false
+crosshairGui.IgnoreGuiInset = true
+crosshairGui.DisplayOrder = 999
+crosshairGui.Enabled = false
+crosshairGui.Parent = game:GetService("CoreGui")
+local dot = Instance.new("Frame")
+dot.Name = "CrossDot"
+dot.Size = UDim2.new(0, 10, 0, 10) 
+dot.Position = UDim2.new(0.5, -5, 0.5, -5)
+dot.AnchorPoint = Vector2.new(0, 0)
+dot.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+dot.BackgroundTransparency = 0
+dot.BorderSizePixel = 0
+dot.Parent = crosshairGui
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(1, 0) 
+corner.Parent = dot
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.Thickness = 2
+stroke.Transparency = 0.3
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Parent = dot
+local function updateCrosshairVisibility()
+	crosshairGui.Enabled = unlockCamEnabled and showCrosshairEnabled
+end
+local function updateCrosshairVisibility()
+	crosshairGui.Enabled = unlockCamEnabled and showCrosshairEnabled
+end
+local function isGunEquipped()
+	local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
+	return tool and GunMapping[tool.Name]
+end
+RunService.RenderStepped:Connect(function()
+	local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
+	if not tool or (tool:GetAttribute("client_last_attack_time") and not GunMapping[tool.Name]) then
+		if player.Character and player.Character:FindFirstChild("Humanoid") then
+			Camera.CameraSubject = player.Character:FindFirstChild("Humanoid")
+		end
+		return
+	end
+	if aimAssistFollow and lastTarget and GunMapping[tool.Name] then
+		local targetHRP = lastTarget:FindFirstChild("HumanoidRootPart")
+		if targetHRP then
+			Camera.CameraSubject = targetHRP
+		end
+	end
+end)
+local function shootTarget(target)
+	local char = player.Character
+	if not char then return end
+	local weapon = nil
+	for _, tool in ipairs(char:GetChildren()) do
+		if tool:IsA("Tool") and GunMapping[tool.Name] then
+			weapon = tool
+			break
+		end
+	end
+	if not weapon then return end
+	local targetHead = target:FindFirstChild("Head")
+	if not targetHead then return end
+	local myHRP = char:FindFirstChild("HumanoidRootPart")
+	if not myHRP then return end
+	local shootCFrame = CFrame.lookAt(myHRP.Position, targetHead.Position)
+	ShootRemote:FireServer(
+		workspace:GetServerTimeNow(),
+		weapon,
+		shootCFrame,
+		{ ["2"] = target:FindFirstChild("Humanoid") }
+	)
+end
+RunService.Heartbeat:Connect(function()
+	if isGunMasterEnabled and isAutoKillFromCombo then
+		local target = getNearestEnemy(AimbotLock, false, true) 
+		if target then
+			shootTarget(target)
+		end
+	end
+end)
+RunService.RenderStepped:Connect(function()
+	if not aimAssistFollow then return end
+	local char = player.Character
+	if not char or not char:FindFirstChild("Humanoid") then return end
+	local target = getNearestEnemy(AimbotLock, false, true) 
+	if target and target:FindFirstChild("Humanoid") then
+		if target ~= lastTarget then
+			lastTarget = target
+			Camera.CameraSubject = target.Humanoid
+		end
+	else
+		Camera.CameraSubject = char.Humanoid
+		lastTarget = nil
+	end
+end)
+local function isPC()
+	return not UIS.TouchEnabled and UIS.KeyboardEnabled
+end
+local function pressKey(keyCode)
+	VIM:SendKeyEvent(true, keyCode, false, game)
+	task.wait()
+	VIM:SendKeyEvent(false, keyCode, false, game)
+end
+local function findReloadButton()
+	for _, gui in pairs(player:WaitForChild("PlayerGui"):GetDescendants()) do
+		if gui:IsA("TextButton") or gui:IsA("ImageButton") then
+			local name = gui.Name:lower()
+			local text = tostring(gui.Text):lower()
+			if name:find("reload") or text:find("reload") then
+				return gui
+			end
+		end
+	end
+	return nil
+end
+local function clickReloadButton()
+	local btn = findReloadButton()
+	if btn and btn.Visible and btn.AbsoluteSize.Magnitude > 0 then
+		pcall(function()
+			btn:Activate()
+		end)
+		return true
+	end
+	return false
+end
+RunService.Heartbeat:Connect(function()
+	if not autoReloadEnabled then return end
+	local char = player.Character
+	if not char then return end
+	for toolName, _ in pairs(GunMapping) do
+		local tool = char:FindFirstChild(toolName)
+		if tool then
+			local weaponModel = workspace:FindFirstChild(player.Name)
+				and workspace[player.Name]:FindFirstChild(toolName)
+			if weaponModel then
+				local clientState = weaponModel:FindFirstChild("ClientWeaponState")
+				local config = tool:FindFirstChild("WeaponConfiguration")
+				if clientState and config then
+					local ammoValue = clientState:FindFirstChild("CurrentAmmo")
+					local reloadDuration = config:FindFirstChild("ReloadDuration")
+					if ammoValue and reloadDuration and ammoValue.Value <= 3 then
+						if reloadInstantEnabled then
+							if originalReloadTimes[tool.Name] == nil then
+								originalReloadTimes[tool.Name] = reloadDuration.Value
+							end
+							reloadDuration.Value = 0
+						end
+						if isPC() then
+							pressKey(Enum.KeyCode.R)
+						else
+							local success = clickReloadButton()
+							if not success then
+								ReloadRemote:FireServer(workspace:GetServerTimeNow(), tool)
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end)
+game:GetService("RunService").RenderStepped:Connect(function()
+	if not autoAimEnabled then return end
+	if aimLockMode ~= "ล็อคตลอด" and aimLockMode ~= "รอการคลิ๊กขาวค้าง [PC]" then
+		return
+	end
+	if aimLockMode == "รอการคลิ๊กขาวค้าง [PC]" then
+		if not game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+			return
+		end
+	end
+	if not isGunEquipped() then return end
+	local target = getNearestEnemy(AimbotLock, false, true)
+	local char = player.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+	if not (target and hrp) then return end
+	local targetPart = target:FindFirstChild("Head") or target:FindFirstChild("HumanoidRootPart")
+	if not targetPart then return end
+	local cam = workspace.CurrentCamera
+	cam.CFrame = CFrame.new(cam.CFrame.Position, targetPart.Position)
+end)
+local function getAllKillHitboxes()
+	local results = {}
+	if defaultFunctional then
+		for _, obj in ipairs(defaultFunctional:GetChildren()) do
+			if obj:IsA("BasePart") and obj.Name == "KillHitbox" then
+				table.insert(results, obj)
+			end
+		end
+	end
+	return results
+end
+local function getEquippedGun()
+	local char = player.Character
+	if not char then return nil end
+	for _, tool in ipairs(char:GetChildren()) do
+		if tool:IsA("Tool") and GunMapping[tool.Name] then
+			return tool
+		end
+	end
+	return nil
+end
+local function silentShoot()
+	if not autoAimEnabled then return end
+	if aimLockMode ~= "ยิงตรงไหนก็โดน [โหมดที่ 1]" then return end
+	local weapon = getEquippedGun()
+	if not weapon then return end
+	local target = getNearestEnemy(AimbotLock)
+	if not target then return end
+	local cam = workspace.CurrentCamera
+	local head = target:FindFirstChild("Head")
+	if not cam or not head then return end
+	local screenPoint, onScreen = cam:WorldToViewportPoint(head.Position)
+	if not onScreen then return end
+	shootTarget(target, head)
+end
+local function hookMouseShoot()
+	if isHooked then return end
+	isHooked = true
+	CAS:BindAction(SINK_SHOOT_ACTION, function(_, inputState)
+		if inputState == Enum.UserInputState.Begin then
+			if getEquippedGun() then
+				silentShoot()
+				return Enum.ContextActionResult.Sink 
+			end
+		end
+		return Enum.ContextActionResult.Pass
+	end, false,
+		Enum.UserInputType.MouseButton1, 
+		Enum.UserInputType.Touch         
+	)
+end
+local function unhookMouseShoot()
+	if not isHooked then return end
+	isHooked = false
+	CAS:UnbindAction(SINK_SHOOT_ACTION)
+end
+local function hookSuperAimbot()
+	if isSuperAimbotHooked then return end
+	isSuperAimbotHooked = true
+	WeaponController.FireBullet = function(self, ...)
+		if not autoAimEnabled or aimLockMode ~= "ยิงตรงไหนก็โดน [โหมดที่ 2]" then
+			return originalFireBullet(self, ...)
+		end
+		local target = getNearestEnemy(AimbotLock)
+		if target and target:FindFirstChild("HumanoidRootPart") then
+			local old = Camera.CFrame
+			Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.HumanoidRootPart.Position)
+			originalFireBullet(self, ...)
+			Camera.CFrame = old
+		else
+			originalFireBullet(self, ...)
+		end
+	end
+end
+local function unhookSuperAimbot()
+	if not isSuperAimbotHooked then return end
+	WeaponController.FireBullet = originalFireBullet
+	isSuperAimbotHooked = false
+end
+local function updateAimLockSystem()
+	if AimLockSuper then
+		AimLockSuper.Visible = autoAimEnabled
+	end
+	if not autoAimEnabled then
+		unhookMouseShoot()
+		unhookSuperAimbot()
+		return
+	end
+	if aimLockMode == "ยิงตรงไหนก็โดน [โหมดที่ 1]" then
+		hookMouseShoot()
+		unhookSuperAimbot()
+	elseif aimLockMode == "ยิงตรงไหนก็โดน [โหมดที่ 2]" then
+		unhookMouseShoot()
+		hookSuperAimbot()
+	else
+		unhookMouseShoot()
+		unhookSuperAimbot()
+	end
+end
+local function updateAimFollowCamera()
+	local char = player.Character
+	if aimLockMode == "ล็อคแบบกล้องวาปไปหาศัตรู" and autoAimEnabled then
+		aimAssistFollow = true
+		if not char or not char:FindFirstChild("Humanoid") then
+			Camera.CameraSubject = char and char:FindFirstChild("Humanoid")
+			lastTarget = nil
+			return
+		end
+		local equippedTool = char:FindFirstChildOfClass("Tool")
+		if not equippedTool or not GunMapping[equippedTool.Name] then
+			Camera.CameraSubject = char:FindFirstChild("Humanoid")
+			lastTarget = nil
+			return
+		end
+	else
+		aimAssistFollow = false
+		if char and char:FindFirstChild("Humanoid") then
+			Camera.CameraSubject = char.Humanoid
+		end
+		lastTarget = nil
+	end
+end
+local function applyReloadInstantToTool(tool)
+	if tool:IsA("Tool") and GunMapping[tool.Name] then
+		local config = tool:FindFirstChild("WeaponConfiguration")
+		if config then
+			local reload = config:FindFirstChild("ReloadDuration")
+			if reload then
+				if reloadInstantEnabled then
+					if originalReloadTimes[tool.Name] == nil then
+						originalReloadTimes[tool.Name] = reload.Value
+					end
+					reload.Value = 0
+				else
+					if originalReloadTimes[tool.Name] ~= nil then
+						reload.Value = originalReloadTimes[tool.Name]
+					end
+				end
+			end
+		end
+	end
+end
+local function warpToTrain()
+	local char = player.Character
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	local default = workspace:FindFirstChild("default")
+	local seat = nil
+	local base = nil
+	if default then
+		local controls = default:FindFirstChild("RequiredComponents")
+			and default.RequiredComponents:FindFirstChild("Controls")
+		seat = controls and controls:FindFirstChild("ConductorSeat")
+			and controls.ConductorSeat:FindFirstChild("VehicleSeat")
+		base = default:FindFirstChild("Platform")
+			and default.Platform:FindFirstChild("Base")
+	end
+	if hrp and hum and seat and base then
+		hrp.CFrame = seat.CFrame + Vector3.new(0, 2, 0)
+		task.wait(0.1)
+		hum.Sit = true
+		task.delay(1, function()
+			if char and char:FindFirstChild("HumanoidRootPart") then
+				char.HumanoidRootPart.CFrame = base.CFrame + Vector3.new(0, 3, 0)
+			end
+		end)
+	end
+end
+local function isMeleeEquipped()
+	local char = player.Character
+	if not char then return false end
+	local tool = char:FindFirstChildOfClass("Tool")
+	return tool and tool:GetAttribute("client_last_attack_time") ~= nil
+end
+local function isGunEquipped()
+	local char = player.Character
+	if not char then return false end
+	local tool = char:FindFirstChildOfClass("Tool")
+	return tool and GunMapping[tool.Name] ~= nil
+end
+RunService.RenderStepped:Connect(function()
+	if autoAttackEnabled and isMeleeEquipped() then
+		pcall(tryAttackNearest)
+	end
+	if isGunMasterEnabled and isGunEquipped() then
+		if aimLockMode == "ฆ่าออโต้สุดโหด" then
+			autoKillEnabled = true
+		end
+		if lockAimRadiobox and lockAimRadiobox.Value then
+			autoAimEnabled = true
+			updateAimFollowCamera()
+			updateAimLockSystem()
+			if AimLockSuper then AimLockSuper.Visible = true end
+		end
+		if showHighlightRadiobox and showHighlightRadiobox.Value then
+			showGunHighlight = true
+		end
+		if showFovRadiobox and showFovRadiobox.Value then
+			showFovCircle = true
+			if FovCircleLock then FovCircleLock.Visible = true end
+		end
+		if wallCheckRadiobox and wallCheckRadiobox.Value then
+			checkWallEnabled = true
+		end
+	else
+		autoKillEnabled = false
+		autoAimEnabled = false
+		showGunHighlight = false
+		showFovCircle = false
+		checkWallEnabled = false
+		if fovCircle then fovCircle.Visible = false end
+		if AimLockSuper then AimLockSuper.Visible = false end
+		if FovCircleLock then FovCircleLock.Visible = false end
+		removeHighlight("gun")
+	end
+end)
+local function NoclipLoop()
+	if Clip == false and LocalPlayer.Character then
+		for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+			if part:IsA("BasePart") and part.CanCollide and part.Name ~= floatName then
+				part.CanCollide = false
+			end
+		end
+	end
+end
+LocalPlayer.CharacterAdded:Connect(function()
+	if not Clip then
+		task.wait(1)
+		NoclipLoop()
+	end
+end)
+
+local AboutMe = CreateTab("ข้อมูล", 18754976792)
+local General = CreateTab("ฟังชั่นหลัก", 11894535915)
+local Player = CreateTab("ฟังขั่นผู้เล่น", 18854794412)
+local Settings = CreateTab("ฟังชั่นการตั้งค่าต่างๆ", ReGui.Icons.Settings)
+local DevME = CreateRegion(AboutMe, "ข้อมูล", 18754976792)
+DevME:Label({
+    Text = [[
+📜 สคริปต์นี้ถูกทำโดย: DayToDay2044
+📬 เข้าร่วมกลุ่มดิสได้ที่: https://discord.gg/fzUDH7y2
+🐞 สคริปต์มีปัญหาแจ้งได้ที่ดิสเลยน้าาา
+🌟 ขอให้เล่นสคริปต์อยากสนุกน้าาาาาาาาาาาาาา
+และวิธีการปรับขนาด UI ให้มองมุมขาวล่างจะเห็นเขียวๆกดค้างได้เลยมันก็จะขยาย
+
+ติดตามช่องได้ที่ OcyBux Hub]],
+    TextWrapped = true
+})
+local MainSection = CreateRegion(General, "ฟังชั่นหลักต่างๆ") 
+MainSection:Checkbox({
+	IniFlag = "ESP_Show",
+	Value = false,
+	Label = "โปรมองทะลุ",
+	Callback = function(self, Value)
+		getgenv()._ESP_Enabled = Value
+		clearESP()
+	end
+})
+local autoPickupCheckbox = MainSection:Checkbox({
+	IniFlag = "AutoPickup",
+	Value = false,
+	Label = "ออโต้เก็บของโดยรอบ",
+	Callback = function(self, Value)
+		autoPickupEnabled = Value
+	end
+})
+local autoAttackCheckbox = MainSection:Checkbox({
+	IniFlag = "AutoAttack",
+	Value = false,
+	Label = "อาวุธระยะใกล้ฆ่าออโต้",
+	Callback = function(self, Value)
+		autoAttackEnabled = Value
+		if not Value then
+			removeHighlight("melee")
+		end
+	end
+})
+task.spawn(function()
+	while true do
+		task.wait(0.01)
+		if autoAttackEnabled then
+			pcall(tryAttackNearest)
+		end
+	end
+end)
+
+MainSection:Checkbox({
+	IniFlag = "AutoAttack_GUN",
+	Value = false,
+	Label = "อาวุธระยะไกลเล็งโหด",
+	Callback = function(self, Value)
+		isGunMasterEnabled = Value
+	end
+})
+MainSection:Checkbox({
+	IniFlag = "Instant_Reload",
+	Value = false,
+	Label = "รีโหลดกระสุนทันที",
+	Callback = function(self, Value: boolean)
+		reloadInstantEnabled = Value
+		local char = LocalPlayer.Character
+		if not char then return end
+		for _, tool in ipairs(char:GetChildren()) do
+			applyReloadInstantToTool(tool)
+		end
+	end
+})
+LocalPlayer.CharacterAdded:Connect(function(char)
+	char.ChildAdded:Connect(function(child)
+		task.defer(function()
+			if reloadInstantEnabled then
+				applyReloadInstantToTool(child)
+			end
+		end)
+	end)
+end)
+if LocalPlayer.Character then
+	LocalPlayer.Character.ChildAdded:Connect(function(child)
+		task.defer(function()
+			if reloadInstantEnabled then
+				applyReloadInstantToTool(child)
+			end
+		end)
+	end)
+end
+MainSection:Checkbox({
+	IniFlag = "AutoReload",
+	Value = false,
+	Label = "ออโต้รีโหลดกระสุน",
+	Callback = function(self, Value: boolean)
+		autoReloadEnabled = Value
+	end
+})
+MainSection:Checkbox({
+	IniFlag = "TrainAura",
+	Value = false,
+	Label = "รถไฟสุดโหด",
+	Callback = function(self, Value: boolean)
+		isTrainAuraEnabled = Value
+	end
+})
+MainSection:Checkbox({
+	IniFlag = "UnlockCam",
+	Value = true,
+	Label = "ปลดล็อคมุมกล้อง",
+	Callback = function(self, Value)
+		unlockCamEnabled = Value
+		local player = game:GetService("Players").LocalPlayer
+		if Value then
+			setCameraUnlocked()
+			if unlockMouseEnabled then
+				game:GetService("UserInputService").MouseBehavior = Enum.MouseBehavior.Default
+				game:GetService("UserInputService").MouseIconEnabled = true
+			end
+		else
+			unlockMouseEnabled = false
+			resetCameraToDefault()
+			pcall(function()
+				player.DevEnableMouseLock = false
+			end)
+		end
+		updateCrosshairVisibility()
+	end
+})
+MoreSettings = MainSection:CollapsingHeader({Title="การตั้งค่าฟังชั่นต่างๆ"})
+MoreSettings:Separator({Text="การตั้งค่า: โปรมองทะลุ"}) 
+MoreSettings:Checkbox({
+	Value = getgenv().showItemESP or false,
+	Label = "แสดงกรอบและชื่อของ Items",
+	Callback = function(_, Value: boolean)
+		getgenv().showItemESP = Value
+		clearESP()
+	end
+})
+local BOX_ESP = MoreSettings:Row({Spacing = 30, })
+BOX_ESP:Radiobox({
+	Value = false,
+	Label = "แสดงกรอบ",
+	Callback = function(self, Value: boolean)
+		getgenv().showESP = Value
+	end
+})
+BOX_ESP:Combo({
+	Label = "",
+	Selected = "แสดงกรอบ 2D",
+	Items = {
+		"แสดงกรอบ 2D",
+		"แสดงกรอบ 3D",
+		"แสดงกรอบ 4 มุม"
+	},
+	Callback = function(_, Value)
+		if Value == "แสดงกรอบ 2D" then
+			getgenv().espMode = "2D"
+		elseif Value == "แสดงกรอบ 3D" then
+			getgenv().espMode = "3D"
+		elseif Value == "แสดงกรอบ 4 มุม" then
+			getgenv().espMode = "Corner"
+		end
+		clearESP()
+	end
+})
+local LINE_ESP = MoreSettings:Row({Spacing = 40, })
+LINE_ESP:Radiobox({
+    Value = false,
+    Label = "แสดงเส้น",
+    Callback = function(_, Value: boolean)
+        getgenv().showLineESP = Value
+        clearESP()
+    end
+})
+LINE_ESP:Combo({
+    Label = "",
+    Selected = "แสดงเส้นมุมบน",
+    Items = {
+        "แสดงเส้นมุมบน",
+        "แสดงเส้นมุมล่าง",
+        "แสดงเส้นตรงกลาง"
+    },
+    Callback = function(_, Value)
+        if Value == "แสดงเส้นมุมบน" then
+            getgenv().lineMode = "Top"
+        elseif Value == "แสดงเส้นมุมล่าง" then
+            getgenv().lineMode = "Bottom"
+        elseif Value == "แสดงเส้นตรงกลาง" then
+            getgenv().lineMode = "Center"
+        end
+        clearESP()
+    end
+})
+MoreSettings:Radiobox({
+	Value = getgenv().showHealthBar,
+	Label = "แสดงแถบเลือด",
+	Callback = function(_, Value: boolean)
+		getgenv().showHealthBar = Value
+		clearESP()
+	end
+})
+MoreSettings:Radiobox({
+	Value = getgenv().showNameESP or false, 
+	Label = "แสดงชื่อ",
+	Callback = function(self, Value: boolean)
+		getgenv().showNameESP = Value
+		clearESP()
+	end
+})
+RunService.RenderStepped:Connect(function()
+	clearESP()
+	if not getgenv()._ESP_Enabled then return end
+	for _, inst in ipairs(workspace:GetDescendants()) do
+		if isValidESPItem(inst) and getgenv().showItemESP then
+			updateItemESP(inst)
+		elseif isValidESPEnemy(inst) then
+			if getgenv().showESP then updateNPCESP_BOX(inst) end
+			if getgenv().showLineESP then updateNPCESP_LINE(inst) end
+			if getgenv().showHealthBar then updateNPCESP_HEALTH(inst) end
+			if getgenv().showNameESP then updateNPCESP_NAME(inst) end
+		end
+	end
+end)
+MoreSettings:Separator({Text="การตั้งค่า: ออโต้เก็บของโดยรอบ"}) 
+MoreSettings:Radiobox({
+	Value = false,
+	Label = "ถือกระเป๋าออโต้เวลาเจอของ",
+	Callback = function(self, Value: boolean)
+		autoEquipSackEnabled = Value
+	end
+})
+MoreSettings:Radiobox({
+	Value = false,
+	Label = "ไม่เก็บศพมอนเตอร์",
+	Callback = function(self, Value: boolean)
+		dontPickupCorpse = Value
+	end
+})
+MoreSettings:Keybind({
+	Label = "คีย์ลัดเปิด/ปิด",
+	Value = Enum.KeyCode.Q,
+	KeyBlacklist = { Enum.UserInputType.Touch },
+	Callback = function(self, KeyId)
+		autoPickupCheckbox:Toggle()
+	end,
+	OnKeybindSet = function(self, KeyId)
+	end
+})
+MoreSettings:Separator({Text="การตั้งค่า: อาวุธระยะใกล้ฆ่าออโต้"}) 
+MoreSettings:Radiobox({
+	Value = false,
+	Label = "โชว์ไฮไลเวลาใกล้เป้าหมาย",
+	Callback = function(self, Value: boolean)
+		showHighlightOnProximity = Value 
+		if not Value then
+			removeHighlight("melee")
+		end
+	end
+})
+RunService.RenderStepped:Connect(function()
+	if autoAttackEnabled and showHighlightOnProximity and isMeleeEquipped() then
+		local target = getNearestEnemy(12, true, false)
+		if target then
+			applyHighlight(target, "melee") 
+		else
+			removeHighlight("melee")
+		end
+	else
+		removeHighlight("melee")
+	end
+end)
+MoreSettings:Radiobox({
+	Value = true,
+	Label = "อาวุธมีอนิเมชั่นการสวิง",
+	Callback = function(self, Value: boolean)
+		playWeaponSwingAnimation = Value
+	end
+})
+MoreSettings:Radiobox({
+	Value = dontKillHorse_Melee,
+	Label = "ไม่ฆ่าม้า",
+	Callback = function(self, Value: boolean)
+		dontKillHorse_Melee = Value
+	end
+})
+MoreSettings:Keybind({
+	Label = "คีย์ลัดเปิด/ปิด",
+	Value = Enum.KeyCode.X,
+	KeyBlacklist = { Enum.UserInputType.Touch },
+	Callback = function(self, KeyId)
+		autoAttackCheckbox:Toggle()
+	end,
+	OnKeybindSet = function(self, KeyId)
+	end
+})
+MoreSettings:Separator({Text="การตั้งค่า: อาวุธระยะไกลเล็งโหด"})
+MoreSettings:Radiobox({
+	Value = dontKillHorse_Gun,
+	Label = "ไม่ฆ่าม้าไม่ล็อคม้า",
+	Callback = function(self, Value: boolean)
+		dontKillHorse_Gun = Value
+	end
+})
+showHighlightRadiobox = MoreSettings:Radiobox({
+	Value = true,
+	Label = "โชว์ไฮไลเวลาล็อค",
+	Callback = function(self, Value: boolean)
+		if not isGunMasterEnabled then return end
+		showGunHighlight = Value
+		if not Value then removeHighlight("gun") end 
+	end
+})
+RunService.RenderStepped:Connect(function()
+	if not isGunMasterEnabled then
+		removeHighlight("gun")
+		return
+	end
+	if autoAimEnabled and showGunHighlight and isGunEquipped() then
+		local target = getNearestEnemy(AimbotLock, false, true)
+		if target then
+			applyHighlight(target, "gun")
+		else
+			removeHighlight("gun")
+		end
+	else
+		removeHighlight("gun")
+	end
+end)
+local bullets = MoreSettings:Bullet({})bullets:Label({ Text = "การตั้งค่าเพิ่มเติม: อาวุธระยะไกลเล็งโหด" })
+local RowAimbot = MoreSettings:Row({Spacing = 40})
+lockAimRadiobox = RowAimbot:Radiobox({
+	Value = false,
+	Label = "ล็อคเป้าอัตโนมัติ [มี 6 แบบ]",
+	Callback = function(self, value)
+		if not isGunMasterEnabled then return end
+		autoAimEnabled = value
+		updateAimFollowCamera()
+		updateAimLockSystem()
+	end
+})
+RowAimbot:Combo({
+	Label = "",
+	Selected = "1.ล็อคตลอด",
+	Items = {
+		"1.ล็อคตลอด",
+		"2.รอการคลิ๊กขาวค้าง [PC]",
+		"3.ล็อคแบบกล้องวาปไปหาศัตรู",
+		"4.ยิงตรงไหนก็โดน [โหมดที่ 1]",
+		"5.ยิงตรงไหนก็โดน [โหมดที่ 2]",
+		"6.ฆ่าออโต้สุดโหด"
+	},
+	Callback = function(self, selected)
+		if not isGunMasterEnabled then return end
+		local mode = aimLockModesMap[selected]
+		if not mode then return end
+		aimLockMode = mode
+		autoKillMode = mode
+		isAutoKillFromCombo = (mode == "ฆ่าออโต้สุดโหด")
+		updateAimFollowCamera()
+		updateAimLockSystem()
+	end
+})
+AimLockSuper = MoreSettings:SliderProgress({
+	Label = "ปรับระยะล็อคเป้าอัตโนมัติ",
+	Value = AimbotLock,
+	Minimum = 1,
+	Maximum = 1000,
+	Callback = function(self, value)
+		AimbotLock = value
+	end
+})
+AimLockSuper.Visible = false
+showFovRadiobox = MoreSettings:Radiobox({
+	Value = false,
+	Label = "โชว์กรอบวงกลม",
+	Callback = function(self, Value: boolean)
+		if not isGunMasterEnabled then return end
+		showFovCircle = Value
+		FovCircleLock.Visible = Value
+	end
+})
+FovCircleLock = MoreSettings:SliderProgress({
+	Label = "ปรับขนาดกรอบวงกลม",
+	Value = fovCircleRadius,
+	Minimum = 50,
+	Maximum = 300,
+	Callback = function(self, value)
+		fovCircleRadius = value
+	end
+})
+FovCircleLock.Visible = false
+local fovCircle = Drawing.new("Circle")
+fovCircle.Thickness = 2
+fovCircle.NumSides = 64
+fovCircle.Filled = false
+fovCircle.Visible = false
+local function getRainbowColor(speed)
+	local t = tick() * speed
+	return Color3.fromHSV(t % 1, 1, 1)
+end
+RunService.RenderStepped:Connect(function()
+	if not fovCircle then return end
+	fovCircle.Visible = showFovCircle
+	if showFovCircle then
+		local cam = workspace.CurrentCamera
+		local screenCenter = cam.ViewportSize / 2
+		fovCircle.Position = Vector2.new(screenCenter.X, screenCenter.Y)
+		fovCircle.Radius = fovCircleRadius
+		fovCircle.Color = getRainbowColor(0.2) 
+	end
+end)
+MoreSettings:Radiobox({
+	Value = false,
+	Label = "เช็คกำแพง",
+	Callback = function(self, Value: boolean)
+		checkWallEnabled = Value
+	end
+})
+MoreSettings:Separator({Text="การตั้งค่า: รถไฟสุดโหด"})
+MoreSettings:Radiobox({
+	Value = false,
+	Label = "รถไฟฆ่าออโต้ [เราต้องขับรถไฟเอง]",
+	Callback = function(self, Value)
+		if not isTrainAuraEnabled then
+			return
+		end
+		local killBoxes = getAllKillHitboxes()
+		if #killBoxes == 0 then return end
+		for _, box in ipairs(killBoxes) do
+			if Value then
+				if not originalSizes[box] then
+					originalSizes[box] = box.Size
+				end
+				box.Size = Vector3.new(3000, 3000, 3000)
+			else
+				if originalSizes[box] then
+					box.Size = originalSizes[box]
+				end
+			end
+		end
+	end 
+})
+local warpRow = MoreSettings:Row({Spacing = 10})
+warpRow:Button({
+	Text = "วาปกลับรถไฟทันที",
+	Callback = function()
+		if not isTrainAuraEnabled then
+			return
+		end
+		warpToTrain()
+	end
+})
+warpRow:Keybind({
+	Label = "คีย์ลัดวาปกลับรถไฟ",
+	Value = Enum.KeyCode.C,
+	KeyBlacklist = { Enum.UserInputType.Touch },
+	OnKeybindSet = function(self, KeyId)
+	end,
+	Callback = function(self, KeyId)
+		if not isTrainAuraEnabled then
+			return
+		end
+		warpToTrain()
+	end
+})
+MoreSettings:Separator({Text="การตั้งค่า: ปลดล็อคมุมกล้อง"})
+MoreSettings:Radiobox({
+	Value = true,
+	Label = "โชว์เป้ากลางจอ",
+	Callback = function(self, Value: boolean)
+		showCrosshairEnabled = Value
+		updateCrosshairVisibility()
+	end
+})
+unlockMouseRadiobox = MoreSettings:Radiobox({
+	Value = true,
+	Label = "ปลดล็อคเคอเซอร์เมาค์ [PC]",
+	Callback = function(self, Value: boolean)
+		if isForceSetMouse then return end
+		if not unlockCamEnabled then
+			unlockMouseEnabled = false
+			isForceSetMouse = true
+			self:SetValue(false)
+			isForceSetMouse = false
+			return
+		end
+		unlockMouseEnabled = Value
+		if Value then
+			UIS.MouseBehavior = Enum.MouseBehavior.Default
+			UIS.MouseIconEnabled = true
+		else
+			UIS.MouseBehavior = Enum.MouseBehavior.LockCenter
+			UIS.MouseIconEnabled = true
+		end
+	end
+})
+shiftlockRadiobox = MoreSettings:Radiobox({
+	Value = false,
+	Label = "ปลดล็อคชิบล็อค",
+	Callback = function(self, Value: boolean)
+		if isForceSetShiftLock then return end
+		if not unlockCamEnabled then
+			unlockShiftLockEnabled = false
+			isForceSetShiftLock = true
+			self:SetValue(false)
+			isForceSetShiftLock = false
+			return
+		end
+		unlockShiftLockEnabled = Value
+		pcall(function()
+			game:GetService("Players").LocalPlayer.DevEnableMouseLock = Value
+		end)
+	end
+})
+local PlayerControl = CreateRegion(Player, "ฟังชั่นผู้เล่นต่างๆ") 
+local TeleportMore = CreateRegion(Player, "ฟังชั่นวาปสุดเจ๋ง [เร็วๆนี้]") 
+PlayerControl:Checkbox({
+	Value = false,
+	Label = "วิ่งเร็วขึ้น",
+	Callback = function(self, Value: boolean)
+		local player = game.Players.LocalPlayer
+		if not player then return end
+		local character = player.Character or player.CharacterAdded:Wait()
+		local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+		if not humanoid then return end
+		if Value then
+			humanoid.WalkSpeed = 18
+		else
+			humanoid.WalkSpeed = 16 
+		end
+	end
+})
+PlayerControl:Checkbox({
+	Value = false,
+	Label = "เดินทะลุ",
+	Callback = function(self, Value: boolean)
+		Clip = not Value
+		if Value then
+			if not Noclipping then
+				Noclipping = RunService.Stepped:Connect(NoclipLoop)
+			end
+		else
+			if Noclipping then
+				Noclipping:Disconnect()
+				Noclipping = nil
+			end
+		end
+	end
+})
+local brightLoop = nil
+local function enableFullBright()
+	if brightLoop then brightLoop:Disconnect() end
+	brightLoop = RunService.RenderStepped:Connect(function()
+		Lighting.Brightness = 2
+		Lighting.ClockTime = 14
+		Lighting.FogEnd = 100000
+		Lighting.GlobalShadows = false
+		Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+	end)
+end
+local function disableFullBright()
+	if brightLoop then
+		brightLoop:Disconnect()
+		brightLoop = nil
+	end
+end
+PlayerControl:Checkbox({
+	Value = false,
+	Label = "สว่างตลอดเวลา",
+	Callback = function(self, Value: boolean)
+		if Value then
+			enableFullBright()
+		else
+			disableFullBright()
+		end
+	end
+})
