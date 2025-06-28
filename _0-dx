@@ -1,12 +1,12 @@
 --Main Script for OcyBux Hub V1.0 [Dead Rails รางตาย]
-if getgenv()._OcyBuxHUB then return end
-getgenv()._OcyBuxHUB = true
+if getgenv()._OcyBuxHUBDeadRailS0x9 then return end
+getgenv()._OcyBuxHUBDeadRailS0x9 = true
 if not game:IsLoaded() then game.Loaded:Wait() end
 if not game:IsLoaded() then
 	repeat task.wait() until game:IsLoaded()
 end
 local validatedOnce = false
-local expectedUrl = "https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/_0-dx"
+local expectedUrl = "https://raw.githubusercontent.com/SUNRTX22/beekar/refs/heads/Showpopup/Auto%20Rejoin%20farm%20bound"
 local realDestroy = cloneref and cloneref(Instance.new("Folder")).Destroy or Instance.Destroy
 local realKick = cloneref and cloneref(game:GetService("Players").LocalPlayer).Kick or game:GetService("Players").LocalPlayer.Kick
 local realShutdown = game.Shutdown
@@ -48,7 +48,7 @@ end
 local function validateLoaderInfo()
 	if validatedOnce then return end
 
-	local info = rawget(getgenv(), "_OcyBuxHUB_DayToDay2044")
+	local info = rawget(getgenv(), "_OcyBuxHUBDeadRAILS0x9_DayToDay2044")
 	if type(info) ~= "table" or info.url ~= expectedUrl or type(info.marker) ~= "userdata" then
 		pcall(deepPurgeAndKick)
 		return
@@ -316,11 +316,21 @@ local aimLockModesMap = {
 	["6.ฆ่าออโต้สุดโหด"] = "ฆ่าออโต้สุดโหด"
 }
 local Clip = true
+local pcESPGroup = {}
+local mobileESPGroup = {}
 local Noclipping = nil
 local floatName = "HumanoidRootPart" 
 local activeCombatMode = nil
 local espObjects = {}
 local isTrainAuraEnabled = false
+getgenv()._DEVICE_MODE = "MOBILE" 
+local boxESPRow
+local lineESPRow
+local healthBarESP
+local nameESP
+local itemESP
+local enemyESP
+
 getgenv()._ESP_Enabled = false
 getgenv().espMode = "2D" -- หรือ "3D", "Corner"
 getgenv().showESP = false -- เปิด/ปิดกรอบ
@@ -344,10 +354,9 @@ end
 local function isValidESPItem(inst)
 	if not inst:IsA("Model") then return false end
 	if inst.Parent ~= workspace:FindFirstChild("RuntimeItems") then return false end
-	local hasEntityName = inst:GetAttribute("EntityName") ~= nil
-	local hasHead = inst:FindFirstChild("Head") ~= nil
-	local isEnemy = inst.Name:match("^Model_") and hasEntityName and hasHead
-	local isObject = not hasEntityName and not hasHead and inst.PrimaryPart
+	local hasObjectInfo = inst:FindFirstChild("ObjectInfo", true) ~= nil
+	local isEnemy = inst:GetAttribute("EntityName") and inst:FindFirstChild("Head")
+	local isObject = inst.PrimaryPart ~= nil and hasObjectInfo
 	return isEnemy or isObject
 end
 local function getBodyColor(model)
@@ -362,32 +371,83 @@ local function getRainbowColor()
 	return Color3.fromHSV((t * 0.2) % 1, 1, 1)
 end
 local function updateItemESP(item)
-	if item:FindFirstChild("ESP_Highlight") then return end
-	local cam = workspace.CurrentCamera
-	local part = item:FindFirstChild("Handle") or item:FindFirstChild("PrimaryPart") or item:FindFirstChild("Main") or item:FindFirstChildWhichIsA("BasePart")
-	if not part then return end
-	local pos, onScreen = cam:WorldToViewportPoint(part.Position)
-	if not onScreen then return end
+	if not getgenv()._ESP_Enabled then return end 
+	if not isValidESPItem(item) then return end
+	local objectInfo = item:FindFirstChild("ObjectInfo", true)
+	if objectInfo and objectInfo:IsA("BillboardGui") then
+		objectInfo.Enabled = true
+		local titleLabel = objectInfo:FindFirstChild("Title")
+		if titleLabel and titleLabel:IsA("TextLabel") then
+			local displayText = item:GetAttribute("EntityName") or item.Name or "???"
+			titleLabel.Text = displayText
+		end
+	end
+	if not item:FindFirstChild("ESP_Highlight") then
+		local highlight = Instance.new("Highlight")
+		highlight.Name = "ESP_Highlight"
+		highlight.Adornee = item
+		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+		highlight.FillTransparency = 1
+		highlight.OutlineTransparency = 0
+		highlight.OutlineColor = getRainbowColor()
+		highlight.Parent = item
+		table.insert(espObjects, highlight)
+	end
+end
+local function disableItemESP()
+	for _, item in pairs(workspace:FindFirstChild("RuntimeItems"):GetChildren()) do
+		local objectInfo = item:FindFirstChild("ObjectInfo", true)
+		if objectInfo and objectInfo:IsA("BillboardGui") then
+			objectInfo.Enabled = false
+		end
+	end
+end
+local function updateNPCESP(npc)
+	local humanoid = npc:FindFirstChild("Humanoid")
+	if humanoid and humanoid.Health <= 0 then return end
+	if npc:FindFirstChild("ESP_Highlight") then return end
+	local displayName = npc.Name:gsub("^Model_", "")
 	local highlight = Instance.new("Highlight")
-	highlight.Adornee = item
+	highlight.Name = "ESP_Highlight"
+	highlight.Adornee = npc
 	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 	highlight.FillTransparency = 1
 	highlight.OutlineTransparency = 0
 	highlight.OutlineColor = getRainbowColor()
-	highlight.Name = "ESP_Highlight"
-	highlight.Parent = item
+	highlight.Parent = npc
 	table.insert(espObjects, highlight)
-	local displayName = item:GetAttribute("EntityName") or item.Name:gsub("^Model_", "")
-	local text = Drawing.new("Text")
-	text.Text = displayName
-	text.Size = 14
-	text.Font = 2
-	text.Color = getRainbowColor()
-	text.Outline = true
-	text.Center = true
-	text.Position = Vector2.new(pos.X, pos.Y - 16)
-	text.Visible = true
-	table.insert(espObjects, text)
+	if not npc:FindFirstChild("ESP_NameTag") then
+		local billboard = Instance.new("BillboardGui")
+		billboard.Name = "ESP_NameTag"
+		billboard.Size = UDim2.new(0, 100, 0, 20)
+		billboard.StudsOffset = Vector3.new(0, 3, 0)
+		billboard.AlwaysOnTop = true
+		billboard.Adornee = npc:FindFirstChild("Head") or npc.PrimaryPart
+		billboard.Parent = npc
+		local nameLabel = Instance.new("TextLabel")
+		nameLabel.Size = UDim2.new(1, 0, 1, 0)
+		nameLabel.BackgroundTransparency = 1
+		nameLabel.TextColor3 = Color3.new(1, 1, 1)
+		nameLabel.TextStrokeTransparency = 0.5
+		nameLabel.TextScaled = true
+		nameLabel.Font = Enum.Font.SourceSansBold
+		nameLabel.Text = displayName
+		nameLabel.Parent = billboard
+	end
+end
+local function clearEnemyESP()
+	for _, model in ipairs(workspace:GetDescendants()) do
+		if model:IsA("Model") then
+			local tag = model:FindFirstChild("ESP_NameTag")
+			if tag then
+				tag:Destroy()
+			end
+			local highlight = model:FindFirstChild("ESP_Highlight")
+			if highlight then
+				highlight:Destroy()
+			end
+		end
+	end
 end
 local function updateNPCESP_BOX(model)
 	local hrp = model:FindFirstChild("HumanoidRootPart")
@@ -564,6 +624,15 @@ local function clearESP()
 		end
 	end
 	table.clear(espObjects)
+end
+function updateDeviceModeVisibility()
+	local isPC = getgenv()._DEVICE_MODE == "PC"
+	if boxESPRow then boxESPRow.Visible = isPC end
+	if lineESPRow then lineESPRow.Visible = isPC end
+	if healthBarESP then healthBarESP.Visible = isPC end
+	if nameESP then nameESP.Visible = isPC end
+	if itemESP then itemESP.Visible = true end
+	if enemyESP then enemyESP.Visible = not isPC end 
 end
 
 local function getHRP()
@@ -1269,6 +1338,7 @@ MainSection:Checkbox({
 	Callback = function(self, Value)
 		getgenv()._ESP_Enabled = Value
 		clearESP()
+		clearEnemyESP() 
 	end
 })
 local autoPickupCheckbox = MainSection:Checkbox({
@@ -1298,7 +1368,6 @@ task.spawn(function()
 		end
 	end
 end)
-
 MainSection:Checkbox({
 	IniFlag = "AutoAttack_GUN",
 	Value = false,
@@ -1379,23 +1448,56 @@ MainSection:Checkbox({
 })
 MoreSettings = MainSection:CollapsingHeader({Title="การตั้งค่าฟังชั่นต่างๆ"})
 MoreSettings:Separator({Text="การตั้งค่า: โปรมองทะลุ"}) 
-MoreSettings:Checkbox({
-	Value = getgenv().showItemESP or false,
-	Label = "แสดงกรอบและชื่อของ Items",
-	Callback = function(_, Value: boolean)
-		getgenv().showItemESP = Value
-		clearESP()
+MoreSettings:Combo({
+	Label = "เลือก API สำหรับโปรมองทะลุ",
+	Selected = "API Highlight [MOBILE/PC]",
+	Items = {
+		"API Highlight [MOBILE/PC]", 
+		"API Drawing [PC]",
+	},
+	Callback = function(_, Value)
+		if Value == "API Highlight [MOBILE/PC]" then
+			getgenv()._DEVICE_MODE = "MOBILE"
+		else
+			getgenv()._DEVICE_MODE = "PC"
+		end
+		updateDeviceModeVisibility()
 	end
 })
-local BOX_ESP = MoreSettings:Row({Spacing = 30, })
-BOX_ESP:Radiobox({
+itemESP = MoreSettings:Radiobox({
+	Value = getgenv().showItemESP or false,
+	Label = "แสดงกรอบและชื่อของไอเท็ม [P/M]",
+	Callback = function(_, Value: boolean)
+	getgenv().showItemESP = Value
+	clearESP()
+	if Value then
+		for _, inst in pairs(workspace:FindFirstChild("RuntimeItems"):GetChildren()) do
+			updateItemESP(inst)
+			end
+		else
+			disableItemESP() 
+		end
+	end
+})
+enemyESP = MoreSettings:Radiobox({
+	Value = getgenv().showEnemyESP or false,
+	Label = "แสดงกรอบและชื่อของศัตรู",
+	Callback = function(_, Value: boolean)
+		getgenv().showEnemyESP = Value
+		if not Value then
+			clearEnemyESP()
+		end
+	end
+})
+boxESPRow = MoreSettings:Row({Spacing = 30})
+boxESPRow:Radiobox({
 	Value = false,
 	Label = "แสดงกรอบ",
 	Callback = function(self, Value: boolean)
 		getgenv().showESP = Value
 	end
 })
-BOX_ESP:Combo({
+boxESPRow:Combo({
 	Label = "",
 	Selected = "แสดงกรอบ 2D",
 	Items = {
@@ -1414,35 +1516,35 @@ BOX_ESP:Combo({
 		clearESP()
 	end
 })
-local LINE_ESP = MoreSettings:Row({Spacing = 40, })
-LINE_ESP:Radiobox({
-    Value = false,
-    Label = "แสดงเส้น",
-    Callback = function(_, Value: boolean)
-        getgenv().showLineESP = Value
-        clearESP()
-    end
+lineESPRow = MoreSettings:Row({Spacing = 40})
+lineESPRow:Radiobox({
+	Value = false,
+	Label = "แสดงเส้น",
+	Callback = function(_, Value: boolean)
+		getgenv().showLineESP = Value
+		clearESP()
+	end
 })
-LINE_ESP:Combo({
-    Label = "",
-    Selected = "แสดงเส้นมุมบน",
-    Items = {
-        "แสดงเส้นมุมบน",
-        "แสดงเส้นมุมล่าง",
-        "แสดงเส้นตรงกลาง"
-    },
-    Callback = function(_, Value)
-        if Value == "แสดงเส้นมุมบน" then
-            getgenv().lineMode = "Top"
-        elseif Value == "แสดงเส้นมุมล่าง" then
-            getgenv().lineMode = "Bottom"
-        elseif Value == "แสดงเส้นตรงกลาง" then
-            getgenv().lineMode = "Center"
-        end
-        clearESP()
-    end
+lineESPRow:Combo({
+	Label = "",
+	Selected = "แสดงเส้นมุมบน",
+	Items = {
+		"แสดงเส้นมุมบน",
+		"แสดงเส้นมุมล่าง",
+		"แสดงเส้นตรงกลาง"
+	},
+	Callback = function(_, Value)
+		if Value == "แสดงเส้นมุมบน" then
+			getgenv().lineMode = "Top"
+		elseif Value == "แสดงเส้นมุมล่าง" then
+			getgenv().lineMode = "Bottom"
+		elseif Value == "แสดงเส้นตรงกลาง" then
+			getgenv().lineMode = "Center"
+		end
+		clearESP()
+	end
 })
-MoreSettings:Radiobox({
+healthBarESP = MoreSettings:Radiobox({
 	Value = getgenv().showHealthBar,
 	Label = "แสดงแถบเลือด",
 	Callback = function(_, Value: boolean)
@@ -1450,7 +1552,7 @@ MoreSettings:Radiobox({
 		clearESP()
 	end
 })
-MoreSettings:Radiobox({
+nameESP = MoreSettings:Radiobox({
 	Value = getgenv().showNameESP or false, 
 	Label = "แสดงชื่อ",
 	Callback = function(self, Value: boolean)
@@ -1458,13 +1560,17 @@ MoreSettings:Radiobox({
 		clearESP()
 	end
 })
+updateDeviceModeVisibility()
 RunService.RenderStepped:Connect(function()
 	clearESP()
 	if not getgenv()._ESP_Enabled then return end
 	for _, inst in ipairs(workspace:GetDescendants()) do
-		if isValidESPItem(inst) and getgenv().showItemESP then
+		if getgenv().showItemESP and isValidESPItem(inst) then
 			updateItemESP(inst)
 		elseif isValidESPEnemy(inst) then
+			if getgenv().showEnemyESP then
+				updateNPCESP(inst)
+			end
 			if getgenv().showESP then updateNPCESP_BOX(inst) end
 			if getgenv().showLineESP then updateNPCESP_LINE(inst) end
 			if getgenv().showHealthBar then updateNPCESP_HEALTH(inst) end
