@@ -1,10 +1,22 @@
-getgenv().SilentAura = getgenv().SilentAura or {}
+getgenv().superOP_Attack = getgenv().superOP_Attack or {
+	Enabled = false
+}
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
+local RunService = game:GetService('RunService')
+local Players = game:GetService('Players')
 local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local Animator = Humanoid:WaitForChild("Animator")
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
-local Character, Humanoid, HumanoidRootPart
+Player.CharacterAdded:Connect(function(NewCharacter)
+    Character = NewCharacter
+    Humanoid = Character:WaitForChild("Humanoid")
+    Animator = Humanoid:WaitForChild("Animator")
+    HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+end)
+
 local AttackAnimations = {
 	'rbxassetid://131430497821198', --// MassInfection, 1x1x1x1
 	'rbxassetid://83829782357897', --// Slash, 1x1x1x1
@@ -111,72 +123,55 @@ local AttackAnimations = {
     'rbxassetid://109230267448394' --// Swing, Noli, Skin: Umbra
 };
 
-local function onCharacter(char)
-    Character = char
-    Humanoid = char:WaitForChild("Humanoid")
-    HumanoidRootPart = char:WaitForChild("HumanoidRootPart")
-end
+local RNG = Random.new()
 
--- เชื่อม character ใหม่เสมอ
-Player.CharacterAdded:Connect(onCharacter)
-if Player.Character then onCharacter(Player.Character) end
+task.spawn(function()
+	while task.wait() do
+		if not getgenv().superOP_Attack.Enabled then continue end
+		if not HumanoidRootPart then continue end
 
-getgenv().SilentAura.Start = function()
-    if getgenv().SilentAura._conn then return end -- ป้องกันซ้อน
+		local Playing = false
+		for _, v in Humanoid:GetPlayingAnimationTracks() do
+			if table.find(AttackAnimations, v.Animation.AnimationId) and (v.TimePosition / v.Length < 0.75) then
+				Playing = true
+			end
+		end
 
-    local RNG = Random.new()
+		if not Playing then continue end
 
-    getgenv().SilentAura._conn = RunService.Heartbeat:Connect(function()
-        if not HumanoidRootPart then return end
+		local Target = nil
+		local NearestDist = 120
 
-        local Playing = false
-        for _, v in Humanoid:GetPlayingAnimationTracks() do
-            if table.find(AttackAnimations, v.Animation.AnimationId) and (v.TimePosition / v.Length < 0.75) then
-                Playing = true
-            end
-        end
-        if not Playing then return end
+		local function loop(tbl)
+			for _, v in ipairs(tbl) do
+				if v == Character or not v:FindFirstChild("HumanoidRootPart") then continue end
+				local dist = (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude
+				if dist < NearestDist then
+					NearestDist = dist
+					Target = v
+				end
+			end
+		end
 
-        local Target
-        local NearestDist = 120
+		loop(workspace.Players:GetDescendants())
+		local npcsFolder = workspace:FindFirstChild("Map", true)
+		if npcsFolder then
+			local npcs = npcsFolder:FindFirstChild("NPCs", true)
+			if npcs then loop(npcs:GetChildren()) end
+		end
 
-        local function loop(tbl)
-            for _, v in ipairs(tbl) do
-                if v == Character or not v:FindFirstChild("HumanoidRootPart") then continue end
-                local dist = (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude
-                if dist < NearestDist then
-                    NearestDist = dist
-                    Target = v
-                end
-            end
-        end
+		if not Target then continue end
 
-        loop(workspace.Players:GetDescendants())
-        local npcsFolder = workspace:FindFirstChild("Map", true)
-        if npcsFolder and npcsFolder:FindFirstChild("NPCs") then
-            loop(npcsFolder.NPCs:GetChildren())
-        end
+		local OldVelocity = HumanoidRootPart.Velocity
+		local NeededVelocity = (
+			Target.HumanoidRootPart.Position
+			+ Vector3.new(RNG:NextNumber(-1.5, 1.5), 0, RNG:NextNumber(-1.5, 1.5))
+			+ (Target.HumanoidRootPart.Velocity * (Player:GetNetworkPing() * 1.25))
+			- HumanoidRootPart.Position
+		) / (Player:GetNetworkPing() * 2)
 
-        if not Target then return end
-
-        local OldVelocity = HumanoidRootPart.Velocity
-        local NeededVelocity =
-            (Target.HumanoidRootPart.Position + Vector3.new(RNG:NextNumber(-1.5, 1.5), 0, RNG:NextNumber(-1.5, 1.5))
-            + (Target.HumanoidRootPart.Velocity * (Player:GetNetworkPing() * 1.25))
-            - HumanoidRootPart.Position) / (Player:GetNetworkPing() * 2)
-
-        HumanoidRootPart.Velocity = NeededVelocity
-        RunService.RenderStepped:Wait()
-        HumanoidRootPart.Velocity = OldVelocity
-    end)
-
-    print("✅ SilentAura Started.")
-end
-
-getgenv().SilentAura.Stop = function()
-    if getgenv().SilentAura._conn then
-        getgenv().SilentAura._conn:Disconnect()
-        getgenv().SilentAura._conn = nil
-        print("🛑 SilentAura Stopped.")
-    end
-end
+		HumanoidRootPart.Velocity = NeededVelocity
+		RunService.RenderStepped:Wait()
+		HumanoidRootPart.Velocity = OldVelocity
+	end
+end)
