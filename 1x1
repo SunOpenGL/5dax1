@@ -1,18 +1,20 @@
--- ปิดตัวเก่า ถ้ามี
-if shared._superop_loop then
-    shared._superop_loop = nil
-    return -- ถ้า Checkbox ถูกปิด มันจะมาหยุดตรงนี้
-end
-
--- ถ้ายังไม่มี loop ให้เริ่มทำงาน
-shared._superop_loop = true
+if not getgenv then return warn("❌ Executor นี้ไม่รองรับ getgenv()") end
+getgenv().KillerFarHitEnabled = getgenv().KillerFarHitEnabled or false
 
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
+local RNG = Random.new()
+
 local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local HRP = Character:WaitForChild("HumanoidRootPart")
+
+Player.CharacterAdded:Connect(function(char)
+	Character = char
+	Humanoid = char:WaitForChild("Humanoid")
+	HRP = char:WaitForChild("HumanoidRootPart")
+end)
 
 local AttackAnimations = {
 	'rbxassetid://131430497821198', --// MassInfection, 1x1x1x1
@@ -119,63 +121,57 @@ local AttackAnimations = {
     'rbxassetid://109230267448394', --// Swing, Noli, Skin: Ephialtes
     'rbxassetid://109230267448394' --// Swing, Noli, Skin: Umbra
 };
-local RNG = Random.new()
 
--- วนลูปรันจนกว่าจะมีคนสั่งปิด
+local function isAttacking()
+	for _, track in Humanoid:GetPlayingAnimationTracks() do
+		if table.find(AttackAnimations, tostring(track.Animation.AnimationId))
+			and (track.TimePosition / track.Length < 0.75) then
+			return true
+		end
+	end
+	return false
+end
+
 task.spawn(function()
-	while shared._superop_loop and task.wait() do
-		if not HumanoidRootPart then continue end
+	while true do
+		task.wait()
 
-		local Playing = false
-		for _, v in Humanoid:GetPlayingAnimationTracks() do
-			if table.find(AttackAnimations, v.Animation.AnimationId) and (v.TimePosition / v.Length < 0.75) then
-				Playing = true
-			end
-		end
+		if not getgenv().KillerFarHitEnabled or not HRP then continue end
+		if not isAttacking() then continue end
 
-		if not Playing then continue end
-
-		local Target = nil
-		local NearestDist = 120
-
-		for _, v in ipairs(workspace.Players:GetDescendants()) do
-			if v ~= Character and v:FindFirstChild("HumanoidRootPart") then
-				local dist = (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude
-				if dist < NearestDist then
-					NearestDist = dist
-					Target = v
+		local nearest, minDist = nil, 120
+		local function scan(group)
+			for _, model in ipairs(group) do
+				if model == Character then continue end
+				local part = model:FindFirstChild("HumanoidRootPart")
+				if not part then continue end
+				local dist = (part.Position - HRP.Position).Magnitude
+				if dist < minDist then
+					minDist = dist
+					nearest = part
 				end
 			end
 		end
 
-		local npcsFolder = workspace:FindFirstChild("Map", true)
-		if npcsFolder then
-			local npcs = npcsFolder:FindFirstChild("NPCs", true)
-			if npcs then
-				for _, v in ipairs(npcs:GetChildren()) do
-					if v:FindFirstChild("HumanoidRootPart") then
-						local dist = (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude
-						if dist < NearestDist then
-							NearestDist = dist
-							Target = v
-						end
-					end
-				end
-			end
+		local wsPlayers = workspace:FindFirstChild("Players")
+		if wsPlayers then scan(wsPlayers:GetDescendants()) end
+
+		local map = workspace:FindFirstChild("Map", true)
+		if map then
+			local npcs = map:FindFirstChild("NPCs", true)
+			if npcs then scan(npcs:GetChildren()) end
 		end
 
-		if not Target then continue end
+		if not nearest then continue end
 
-		local OldVelocity = HumanoidRootPart.Velocity
-		local NeededVelocity = (
-			Target.HumanoidRootPart.Position
-			+ Vector3.new(RNG:NextNumber(-1.5, 1.5), 0, RNG:NextNumber(-1.5, 1.5))
-			+ (Target.HumanoidRootPart.Velocity * (Player:GetNetworkPing() * 1.25))
-			- HumanoidRootPart.Position
-		) / (Player:GetNetworkPing() * 2)
+		local ping = Player:GetNetworkPing() * 1.25
+		local offset = Vector3.new(RNG:NextNumber(-1.5, 1.5), 0, RNG:NextNumber(-1.5, 1.5))
+		local prediction = nearest.Velocity * ping
+		local goal = (nearest.Position + offset + prediction - HRP.Position) / (ping * 2)
 
-		HumanoidRootPart.Velocity = NeededVelocity
+		local oldVel = HRP.Velocity
+		HRP.Velocity = goal
 		RunService.RenderStepped:Wait()
-		HumanoidRootPart.Velocity = OldVelocity
+		HRP.Velocity = oldVel
 	end
 end)
