@@ -1,4 +1,12 @@
--- ระบบ auto ปิดตัวเองถ้า Checkbox UI ปิด
+-- ปิดตัวเก่า ถ้ามี
+if shared._superop_loop then
+    shared._superop_loop = nil
+    return -- ถ้า Checkbox ถูกปิด มันจะมาหยุดตรงนี้
+end
+
+-- ถ้ายังไม่มี loop ให้เริ่มทำงาน
+shared._superop_loop = true
+
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer
@@ -111,17 +119,12 @@ local AttackAnimations = {
     'rbxassetid://109230267448394', --// Swing, Noli, Skin: Ephialtes
     'rbxassetid://109230267448394' --// Swing, Noli, Skin: Umbra
 };
+local RNG = Random.new()
 
--- Flag ป้องกันรันซ้ำ
-if shared._superop_running then return end
-shared._superop_running = true
-
--- ระบบหยุดตัวเองถ้าสภาพไม่พร้อม
+-- วนลูปรันจนกว่าจะมีคนสั่งปิด
 task.spawn(function()
-	local RNG = Random.new()
-	while task.wait() do
-		if not shared._superop_running then break end
-		if not Character or not Humanoid or not HumanoidRootPart then break end
+	while shared._superop_loop and task.wait() do
+		if not HumanoidRootPart then continue end
 
 		local Playing = false
 		for _, v in Humanoid:GetPlayingAnimationTracks() do
@@ -134,9 +137,9 @@ task.spawn(function()
 
 		local Target = nil
 		local NearestDist = 120
-		local function loop(tbl)
-			for _, v in ipairs(tbl) do
-				if v == Character or not v:FindFirstChild("HumanoidRootPart") then continue end
+
+		for _, v in ipairs(workspace.Players:GetDescendants()) do
+			if v ~= Character and v:FindFirstChild("HumanoidRootPart") then
 				local dist = (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude
 				if dist < NearestDist then
 					NearestDist = dist
@@ -145,11 +148,20 @@ task.spawn(function()
 			end
 		end
 
-		loop(workspace.Players:GetDescendants())
 		local npcsFolder = workspace:FindFirstChild("Map", true)
 		if npcsFolder then
 			local npcs = npcsFolder:FindFirstChild("NPCs", true)
-			if npcs then loop(npcs:GetChildren()) end
+			if npcs then
+				for _, v in ipairs(npcs:GetChildren()) do
+					if v:FindFirstChild("HumanoidRootPart") then
+						local dist = (v.HumanoidRootPart.Position - HumanoidRootPart.Position).Magnitude
+						if dist < NearestDist then
+							NearestDist = dist
+							Target = v
+						end
+					end
+				end
+			end
 		end
 
 		if not Target then continue end
@@ -166,5 +178,4 @@ task.spawn(function()
 		RunService.RenderStepped:Wait()
 		HumanoidRootPart.Velocity = OldVelocity
 	end
-	shared._superop_running = false
 end)
