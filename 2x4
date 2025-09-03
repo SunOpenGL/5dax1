@@ -1,15 +1,19 @@
+local EXPECTED_URL = "https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/2x4"
 local validateKeySystem = newcclosure(function()
     if not getgenv().SOMTANK_KEY then
         return warn("❌ Unauthorized! Must pass key system first.")
     end
     local info = rawget(getgenv(), "_SomtankMarker")
-    if type(info) ~= "table" or info.url ~= "Somtank_Huntyzombie" or typeof(info.token) ~= "Instance" then
-        return warn("❌ Invalid loader info. Execution blocked.")
+    if type(info) ~= "table"
+        or info.url ~= "Somtank_Huntyzombie"
+        or typeof(info.token) ~= "Instance"
+        or info.sourceUrl ~= EXPECTED_URL then
+        return warn("❌ Invalid loader info or unauthorized source!")
     end
     pcall(function()
         getgenv()._SomtankMarker = nil
         getgenv().SOMTANK_KEY = false
     end)
-    print("✅ Main script loaded successfully")
+    print("✅ Main script loaded successfully from:", EXPECTED_URL)
 end)
 validateKeySystem()
