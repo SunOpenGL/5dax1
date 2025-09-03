@@ -1,18 +1,15 @@
--- ต้องผ่าน KeySystem ก่อน
-if not getgenv().SOMTANK_KEY then
-	return warn("Unauthorized! Must pass key system first.")
-end
-
--- ตรวจ marker
-local info = rawget(getgenv(), "_SomtankMarker")
-if type(info) ~= "table" or info.url ~= "Somtank_Huntyzombie" or typeof(info.token) ~= "Instance" then
-	return warn("Invalid loader info. Execution blocked.")
-end
-
--- ✅ ใช้เสร็จล้าง marker เพื่อกัน reuse
-pcall(function()
-	getgenv()._SomtankMarker = nil
-	getgenv().SOMTANK_KEY = false
+local validateKeySystem = newcclosure(function()
+    if not getgenv().SOMTANK_KEY then
+        return warn("❌ Unauthorized! Must pass key system first.")
+    end
+    local info = rawget(getgenv(), "_SomtankMarker")
+    if type(info) ~= "table" or info.url ~= "Somtank_Huntyzombie" or typeof(info.token) ~= "Instance" then
+        return warn("❌ Invalid loader info. Execution blocked.")
+    end
+    pcall(function()
+        getgenv()._SomtankMarker = nil
+        getgenv().SOMTANK_KEY = false
+    end)
+    print("✅ Main script loaded successfully")
 end)
-
-print("I am gay")
+validateKeySystem()
