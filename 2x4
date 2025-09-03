@@ -1,0 +1,17 @@
+-- กันรันซ้ำ
+if getgenv()._SomtankEX then return end
+getgenv()._SomtankEX = true
+
+-- ต้องผ่าน KeySystem ก่อน
+if not getgenv().SOMTANK_KEY then
+	return warn("❌ Unauthorized! Must pass key system first.")
+end
+
+-- ตรวจ marker กัน spoof
+local info = rawget(getgenv(), "_SomtankMarker")
+if type(info) ~= "table" or info.url ~= "Somtank_Huntyzombie" or typeof(info.token) ~= "Instance" then
+	return warn("❌ Invalid loader info. Execution blocked.")
+end
+
+-- ✅ ผ่านแล้ว รันโค้ดจริง
+print("Main script loaded successfully ✅")
