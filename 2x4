@@ -1,3 +1,4 @@
+-- ต้องผ่าน KeySystem ก่อน
 if not getgenv().SOMTANK_KEY then
 	return warn("Unauthorized! Must pass key system first.")
 end
@@ -14,4 +15,4 @@ pcall(function()
 	getgenv().SOMTANK_KEY = false
 end)
 
-print("Main script loaded successfully")
+print("I am gay")
