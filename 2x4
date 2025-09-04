@@ -1,11 +1,11 @@
 local EXPECTED_URL = "https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/2x4"
-local EXPECTED_HASH = "your_sha384_hash"
+local EXPECTED_HASH = "put_your_sha384_here"
 
-local validateKeySystem = newcclosure(function()
+local function validateKeySystem()
     if not getgenv().SOMTANK_KEY then
         return warn("❌ Unauthorized! Must pass key system first.")
     end
-    
+
     local info = rawget(getgenv(), "_SomtankMarker")
     if type(info) ~= "table"
         or info.url ~= "Somtank_Huntyzombie"
@@ -14,8 +14,18 @@ local validateKeySystem = newcclosure(function()
         return warn("❌ Invalid loader info or unauthorized source!")
     end
 
-    -- ✅ เพิ่ม Anti-Tamper
-    local hash = getscripthash(script)
+    -- ✅ Hybrid Anti-Tamper Check
+    local ok, hash = pcall(function()
+        -- กรณี script จริงเป็น Instance
+        return getscripthash(info.token) -- token คุณตั้งเป็น Instance.new("Folder")
+    end)
+
+    if not ok or not hash then
+        -- กรณี loadstring (ไม่มี Instance)
+        local source = game:HttpGet(EXPECTED_URL)
+        hash = crypt.hash(source, "sha384")
+    end
+
     if hash ~= EXPECTED_HASH then
         return warn("❌ Script hash mismatch, possible tampering")
     end
@@ -31,6 +41,7 @@ local validateKeySystem = newcclosure(function()
         getgenv()._SomtankMarker = nil
         getgenv().SOMTANK_KEY = false
     end)
-end)
+end
 
+-- Call
 validateKeySystem()
