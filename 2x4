@@ -1,6 +1,12 @@
 local EXPECTED_URL = "https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/2x4"
 
-local function validateKeySystem()
+-- เก็บผล validate
+getgenv()._SomtankValidated = {
+    ok = false,
+    hash = nil
+}
+
+local validateKeySystem = newcclosure(function()
     if not getgenv().SOMTANK_KEY then
         return warn("❌ Unauthorized! Must pass key system first.")
     end
@@ -15,7 +21,7 @@ local function validateKeySystem()
         return warn("❌ Invalid loader info or unauthorized source!")
     end
 
-    -- ✅ ตรวจสอบ hash + salt
+    -- ตรวจสอบ hash + salt
     local ok, source = pcall(function()
         return game:HttpGet(EXPECTED_URL)
     end)
@@ -28,13 +34,19 @@ local function validateKeySystem()
         return warn("❌ Script hash mismatch (salted), possible tampering")
     end
 
-    print("✅ Main script verified with salted hash:", info.hash)
+    -- ผ่าน
+    getgenv()._SomtankValidated.ok = true
+    getgenv()._SomtankValidated.hash = info.hash
+end)
 
-    -- ล้าง marker กัน reuse
-    pcall(function()
-        getgenv()._SomtankMarker = nil
-        getgenv().SOMTANK_KEY = false
-    end)
-end
-
+-- เรียก validate
 validateKeySystem()
+
+-- จุดสูงสุด 🚧 ถ้าไม่ผ่าน script จะหยุดตรงนี้เลย
+assert(getgenv()._SomtankValidated.ok, "❌ Unauthorized! Must run through KeySystem first.")
+
+-- ====== โค้ดหลักเริ่มได้ตั้งแต่ตรงนี้ ======
+print("✅ Verified with salted hash:", getgenv()._SomtankValidated.hash)
+
+-- ตัวอย่างโค้ด UI หรือฟังก์ชันต่าง ๆ
+game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
