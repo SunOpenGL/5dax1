@@ -1,6 +1,6 @@
 local EXPECTED_URL = "https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/2x4"
 
--- เก็บผล validate
+-- reset validated state ทุกครั้งที่โหลดใหม่
 getgenv()._SomtankValidated = {
     ok = false,
     hash = nil
@@ -37,16 +37,21 @@ local validateKeySystem = newcclosure(function()
     -- ผ่าน
     getgenv()._SomtankValidated.ok = true
     getgenv()._SomtankValidated.hash = info.hash
+
+    -- ล้าง marker + key ทันที กัน reuse
+    pcall(function()
+        getgenv()._SomtankMarker = nil
+        getgenv().SOMTANK_KEY = false
+    end)
 end)
 
--- เรียก validate
+-- ✅ เรียก validate
 validateKeySystem()
 
--- จุดสูงสุด 🚧 ถ้าไม่ผ่าน script จะหยุดตรงนี้เลย
+-- ❌ ถ้าไม่ผ่าน หยุดทันที
 assert(getgenv()._SomtankValidated.ok, "❌ Unauthorized! Must run through KeySystem first.")
 
--- ====== โค้ดหลักเริ่มได้ตั้งแต่ตรงนี้ ======
+-- ====== โค้ดหลัก ======
 print("✅ Verified with salted hash:", getgenv()._SomtankValidated.hash)
 
--- ตัวอย่างโค้ด UI หรือฟังก์ชันต่าง ๆ
 game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
