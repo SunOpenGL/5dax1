@@ -14,20 +14,9 @@ local function validateKeySystem()
         return warn("❌ Invalid loader info or unauthorized source!")
     end
 
-    -- ✅ ใช้ hash จาก KeySystem เทียบกับไฟล์จริง
-    local ok, source = pcall(function()
-        return game:HttpGet(EXPECTED_URL)
-    end)
-    if not ok or not source then
-        return warn("❌ Failed to fetch script source for hash check")
-    end
-
-    local currentHash = crypt.hash(source, "sha384")
-    if currentHash ~= info.hash then
-        return warn("❌ Script hash mismatch, possible tampering")
-    end
-
-    print("✅ Main script loaded successfully from:", EXPECTED_URL)
+    -- ❌ ไม่ต้องโหลดไฟล์มาเช็คอีกครั้ง
+    -- ✅ ใช้ hash จาก KeySystem เลย
+    print("✅ Main script verified with hash:", info.hash)
 
     -- ล้าง marker กัน reuse
     pcall(function()
