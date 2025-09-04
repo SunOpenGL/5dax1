@@ -1,5 +1,4 @@
 local EXPECTED_URL = "https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/2x4"
-local EXPECTED_HASH = "put_your_sha384_here"
 
 local function validateKeySystem()
     if not getgenv().SOMTANK_KEY then
@@ -10,11 +9,12 @@ local function validateKeySystem()
     if type(info) ~= "table"
         or info.url ~= "Somtank_Huntyzombie"
         or typeof(info.token) ~= "Instance"
-        or info.sourceUrl ~= EXPECTED_URL then
+        or info.sourceUrl ~= EXPECTED_URL
+        or not info.hash then
         return warn("❌ Invalid loader info or unauthorized source!")
     end
 
-    -- ✅ ใช้ crypt.hash กับ source ตรง ๆ
+    -- ✅ ใช้ hash จาก KeySystem เทียบกับไฟล์จริง
     local ok, source = pcall(function()
         return game:HttpGet(EXPECTED_URL)
     end)
@@ -22,8 +22,8 @@ local function validateKeySystem()
         return warn("❌ Failed to fetch script source for hash check")
     end
 
-    local hash = crypt.hash(source, "sha384")
-    if hash ~= EXPECTED_HASH then
+    local currentHash = crypt.hash(source, "sha384")
+    if currentHash ~= info.hash then
         return warn("❌ Script hash mismatch, possible tampering")
     end
 
@@ -33,7 +33,7 @@ local function validateKeySystem()
 
     print("✅ Main script loaded successfully from:", EXPECTED_URL)
 
-    -- เคลียร์ marker กัน reuse
+    -- ล้าง marker กัน reuse
     pcall(function()
         getgenv()._SomtankMarker = nil
         getgenv().SOMTANK_KEY = false
