@@ -14,18 +14,15 @@ local function validateKeySystem()
         return warn("❌ Invalid loader info or unauthorized source!")
     end
 
-    -- ✅ Hybrid Anti-Tamper Check
-    local ok, hash = pcall(function()
-        -- กรณี script จริงเป็น Instance
-        return getscripthash(info.token) -- token คุณตั้งเป็น Instance.new("Folder")
+    -- ✅ ใช้ crypt.hash กับ source ตรง ๆ
+    local ok, source = pcall(function()
+        return game:HttpGet(EXPECTED_URL)
     end)
-
-    if not ok or not hash then
-        -- กรณี loadstring (ไม่มี Instance)
-        local source = game:HttpGet(EXPECTED_URL)
-        hash = crypt.hash(source, "sha384")
+    if not ok or not source then
+        return warn("❌ Failed to fetch script source for hash check")
     end
 
+    local hash = crypt.hash(source, "sha384")
     if hash ~= EXPECTED_HASH then
         return warn("❌ Script hash mismatch, possible tampering")
     end
@@ -43,5 +40,4 @@ local function validateKeySystem()
     end)
 end
 
--- Call
 validateKeySystem()
