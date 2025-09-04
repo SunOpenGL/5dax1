@@ -10,13 +10,25 @@ local function validateKeySystem()
         or info.url ~= "Somtank_Huntyzombie"
         or typeof(info.token) ~= "Instance"
         or info.sourceUrl ~= EXPECTED_URL
-        or not info.hash then
+        or not info.hash
+        or not info.salt then
         return warn("❌ Invalid loader info or unauthorized source!")
     end
 
-    -- ❌ ไม่ต้องโหลดไฟล์มาเช็คอีกครั้ง
-    -- ✅ ใช้ hash จาก KeySystem เลย
-    print("✅ Main script verified with hash:", info.hash)
+    -- ✅ ตรวจสอบ hash + salt
+    local ok, source = pcall(function()
+        return game:HttpGet(EXPECTED_URL)
+    end)
+    if not ok or not source then
+        return warn("❌ Failed to fetch script source")
+    end
+
+    local currentHash = crypt.hash(source .. info.salt, "sha384")
+    if currentHash ~= info.hash then
+        return warn("❌ Script hash mismatch (salted), possible tampering")
+    end
+
+    print("✅ Main script verified with salted hash:", info.hash)
 
     -- ล้าง marker กัน reuse
     pcall(function()
