@@ -65,30 +65,11 @@ local Lang = {
         EN = "❌ Integrity check failed"
     }
 }
+
+-- ฟังก์ชันเลือกข้อความตามภาษา
 local function T(key)
     local lang = getgenv().Language or "EN"
     return Lang[key] and (Lang[key][lang] or Lang[key]["EN"]) or key
-end
-local function translateAPI(msg)
-    local lang = getgenv().Language or "EN"
-    local map = {
-        ["key is invalid."] = {
-            TH = "❌ คีย์ไม่ถูกต้อง",
-            EN = "❌ Key is invalid"
-        },
-        ["unique constraint violation"] = {
-            TH = "⚠️ คุณมีคีย์ที่กำลังใช้งานอยู่แล้ว กรุณารอให้หมดอายุก่อน",
-            EN = "⚠️ You already have an active key, wait until it expires"
-        },
-        ["server returned an invalid status code, please try again later."] = {
-            TH = "❌ เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง กรุณาลองใหม่ภายหลัง",
-            EN = "❌ Server returned an invalid status code, please try again later"
-        }
-    }
-    if map[msg] then
-        return map[msg][lang] or map[msg]["EN"]
-    end
-    return msg -- ถ้าไม่มีใน mapping
 end
 -------------------------------------------------------------------------------
 -- 📢 ฟังก์ชันแสดงข้อความ
@@ -167,7 +148,7 @@ local function verifyKey(key)
                 return false
             end
         else
-            onMessage(translateAPI(decoded.message))
+            onMessage("⚠️ " .. decoded.message)
             return false
         end
     elseif response and response.StatusCode == 429 then
