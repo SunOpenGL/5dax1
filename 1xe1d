@@ -1,5 +1,4 @@
--- 🌐 ตั้งค่าเริ่มต้น
-getgenv().ScriptKey = "KEY_Day2044" -- ถ้าไม่มีคีย์ ให้รันครั้งแรกก่อน
+getgenv().ScriptKey = "KEY_Day2044ttt" -- ถ้าไม่มีคีย์ ให้รันครั้งแรกก่อน
 getgenv().Language = "EN" -- TH/EN
 getgenv().Settings = {
     AutoExec = true,                      -- เปิดระบบ AutoExec
@@ -51,16 +50,7 @@ local Window = ReGui:Window({
     Size = UDim2.fromOffset(430, 280),
 }):Center()
 local KEY_DURATION = 8 * 60 * 60 
-local KEY_FILE = "OB_LastKey.json"         -- เก็บตัวคีย์
 local KEY_EXPIRE_FILE = "OB_KeyExpire.json" -- เก็บเวลาหมดอายุ
-local function saveKey(key) writefile(KEY_FILE, key) end
-local function loadKey() return isfile(KEY_FILE) and readfile(KEY_FILE) or nil end
-if getgenv().ScriptKey and getgenv().ScriptKey ~= "" then
-    saveKey(getgenv().ScriptKey)
-else
-    local savedKey = loadKey()
-    if savedKey then getgenv().ScriptKey = savedKey end
-end
 local function saveKeyExpireTime()
     if getgenv().KeyExpireTime then
         writefile(KEY_EXPIRE_FILE, tostring(getgenv().KeyExpireTime))
@@ -122,24 +112,62 @@ local Console = Window:Console({
     ReadOnly = true
 })
 getgenv().ReGuiConsole = Console
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+	local cookie = getgenv().RobloxCookie or "YOUR_COOKIE_KEY" -- กุญแจคุกกี้ขอนะจะใส่ไม่ใส่ก็เรื่องของคุณครับ
+	local HttpService = game:GetService("HttpService")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local function AutoExecOnTeleport()
     if not getgenv().Settings or not getgenv().Settings.AutoExec then
         return
     end
-    local savedKey = loadKey()
-    if savedKey then getgenv().ScriptKey = savedKey end
-    local settingsJson = HttpService:JSONEncode(getgenv().Settings)
+
+    -- encode settings เป็น string ปลอดภัย
+    local settingsJson = game:GetService("HttpService"):JSONEncode(getgenv().Settings or {})
+
     local execCode = string.format([[
         getgenv().ScriptKey = %q
-        getgenv().Language = %q
-        getgenv().Settings = game:GetService("HttpService"):JSONDecode(%q)
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/RTX_"))()
-    ]], getgenv().ScriptKey, getgenv().Language, settingsJson)
+        getgenv().Language  = %q
+        getgenv().Settings  = game:GetService("HttpService"):JSONDecode(%q)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/1xe1d"))()
+    ]],
+    tostring(getgenv().ScriptKey or ""),
+    tostring(getgenv().Language or "EN"),
+    settingsJson)
 
     if queue_on_teleport then
         queue_on_teleport(execCode)
     end
 end
+local LocalPlayer = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+local TeleportService = game:GetService("TeleportService")
+local function rejoinServer()
+	local placeId = game.PlaceId
+		local jobId = game.JobId
+		task.spawn(function()
+			pcall(function()
+				AutoExecOnTeleport()
+				TeleportService:TeleportToPlaceInstance(placeId, jobId, LocalPlayer)
+			end)
+			task.wait(3)
+			AutoExecOnTeleport()
+			TeleportService:Teleport(placeId, LocalPlayer)
+		end)
+	end
+	CoreGui.RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+		if child.Name == "ErrorPrompt" then
+			print("⚠️ ErrorPrompt detected → Rejoining...")
+			task.wait(1)
+			rejoinServer()
+		end
+	end)
+	LocalPlayer.OnTeleport:Connect(function(state)
+		if state == Enum.TeleportState.Failed then
+			print("⚠️ Teleport Failed → retrying rejoin...")
+			task.delay(2, rejoinServer)
+		end
+	end)
 local function Run_AutoFix()
     print("✅ Key Verified → เริ่ม AutoFixGen")
     getgenv().DebugForsaken = true
@@ -196,11 +224,6 @@ local function Run_AutoFix()
     function LoggerForsaken.debug(msg)
         table.insert(getgenv().LogQueue, msg)
     end
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local TeleportService = game:GetService("TeleportService")
-	local CoreGui = game:GetService("CoreGui")
     local Network = require(ReplicatedStorage.Modules.Network)
     local Survivors = workspace.Players:WaitForChild("Survivors")
     local INVIS_ANIM2 = "75804462760596"
@@ -216,11 +239,6 @@ function Logger.debug(...)
         warn("[DEBUG]", ...)
     end
 end
-local cookie = getgenv().RobloxCookie or "YOUR_COOKIE_KEY" -- กุญแจคุกกี้ขอนะจะใส่ไม่ใส่ก็เรื่องของคุณครับ
-local HttpService = game:GetService("HttpService")
-local TeleportService = game:GetService("TeleportService")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
 local request = (syn and syn.request) or http_request or request or (fluxus and fluxus.request)
 if not request then
     Logger.debug("ไม่มี request function รองรับ")
@@ -245,8 +263,8 @@ local function SaveJson(path, data)
 end
 local function Rejoin()
     Logger.debug("Random Rejoin เพราะ cache/โหลดเซิร์ฟล้มเหลวหรือหมดหน้าแล้ว")
-    TeleportService:Teleport(game.PlaceId, LocalPlayer)
 	AutoExecOnTeleport()
+    TeleportService:Teleport(game.PlaceId, LocalPlayer)
 end
 local function GetServers(cursor)
     local url = ("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100%s")
@@ -341,36 +359,10 @@ local function TeleportFromCache()
     table.insert(visited, jobId)
     SaveJson(visitedFile, visited)
     Logger.debug("วาร์ปไป JobId:", jobId)
+		AutoExecOnTeleport()
     TeleportService:TeleportToPlaceInstance(game.PlaceId, jobId, LocalPlayer)
-	AutoExecOnTeleport()
 end
 setDebug(false) -- ฟังชั่นเปิดปิด /debug.warn()
-		local function rejoinServer()
-		local placeId = game.PlaceId
-		local jobId = game.JobId
-		task.spawn(function()
-			pcall(function()
-				TeleportService:TeleportToPlaceInstance(placeId, jobId, LocalPlayer)
-				AutoExecOnTeleport()
-			end)
-			task.wait(3)
-			TeleportService:Teleport(placeId, LocalPlayer)
-			AutoExecOnTeleport()
-		end)
-	end
-	CoreGui.RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
-		if child.Name == "ErrorPrompt" then
-			print("⚠️ ErrorPrompt detected → Rejoining...")
-			task.wait(1)
-			rejoinServer()
-		end
-	end)
-	LocalPlayer.OnTeleport:Connect(function(state)
-		if state == Enum.TeleportState.Failed then
-			print("⚠️ Teleport Failed → retrying rejoin...")
-			task.delay(2, rejoinServer)
-		end
-	end)
     local function playInvisAnim()
         local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
         local hum = char:WaitForChild("Humanoid")
@@ -513,8 +505,8 @@ setDebug(false) -- ฟังชั่นเปิดปิด /debug.warn()
 					end
 					if getgenv().Settings.ServerHop_WhenAllGeneratorsDone then
 						LoggerForsaken.debug(T("HOP"))
-						TeleportFromCache()
 						AutoExecOnTeleport()
+						TeleportFromCache()
 						end
 					end
 				end
