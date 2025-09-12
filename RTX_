@@ -216,6 +216,27 @@ local function redeemKey(key)
         return false
     end
 end
+local function copyLink()
+    local response = fRequest({
+        Url = host .. "/public/start",
+        Method = "POST",
+        Body = lEncode({
+            service = service,
+            identifier = lDigest(fGetHwid())
+        }),
+        Headers = {
+            ["Content-Type"] = "application/json"
+        }
+    })
+    if response and response.StatusCode == 200 then
+        local decoded = lDecode(response.Body)
+        if decoded.success and decoded.data and decoded.data.url then
+            setclipboard(decoded.data.url)
+            return decoded.data.url
+        end
+    end
+    return nil
+end
 -------------------------------------------------------------------------------
 -- 🔑 ฟังก์ชัน Redeem & Verify
 -------------------------------------------------------------------------------
@@ -239,7 +260,22 @@ function api.redeemAndVerify(key)
             return false
         end
     else
-        onMessage(T("RedeemFailed"))
+        local link = copyLink()
+        if link then
+            onMessage("❌ คีย์ไม่ถูกต้อง! ลิงก์ keysystem ถูกก๊อปปี้แล้ว: " .. link)
+            if getgenv().KeyLabel then
+                getgenv().KeyLabel.Text = "❌ คีย์ไม่ถูกต้อง! กรุณาเปิดลิงก์ที่ถูกก๊อปปี้ไปเพื่อรับคีย์ใหม่"
+            end
+            pcall(function()
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "Platoboost Keysystem",
+                    Text = "คีย์ไม่ถูกต้อง! ลิงก์ถูกก๊อปปี้ไปแล้ว",
+                    Duration = 8
+                })
+            end)
+        else
+            onMessage("❌ Redeem ล้มเหลว และไม่สามารถสร้างลิงก์ได้")
+        end
         return false
     end
 end
