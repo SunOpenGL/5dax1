@@ -16,6 +16,10 @@ local requestSending = false
 -- 🌐 Dictionary ภาษา
 -------------------------------------------------------------------------------
 local Lang = {
+    Prefix = {
+        TH = "[กำลังยืนยัน] ",
+        EN = "[Verifying] "
+    },
     ["CheckingKey"] = {
         TH = "🔎 กำลังตรวจสอบคีย์ของคุณ...",
         EN = "🔎 Checking your key..."
@@ -64,21 +68,45 @@ local Lang = {
 
 -- ฟังก์ชันเลือกข้อความตามภาษา
 local function T(key)
-    local lang = getgenv().Language
+    local lang = getgenv().Language or "EN"
     return Lang[key] and (Lang[key][lang] or Lang[key]["EN"]) or key
-end
+endlocal function translateAPI(msg)
+    local lang = getgenv().Language or "EN"
 
+    local map = {
+        ["key is invalid."] = {
+            TH = "❌ คีย์ไม่ถูกต้อง",
+            EN = "❌ Key is invalid"
+        },
+        ["unique constraint violation"] = {
+            TH = "⚠️ คุณมีคีย์ที่กำลังใช้งานอยู่แล้ว กรุณารอให้หมดอายุก่อน",
+            EN = "⚠️ You already have an active key, wait until it expires"
+        },
+        ["server returned an invalid status code, please try again later."] = {
+            TH = "❌ เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง กรุณาลองใหม่ภายหลัง",
+            EN = "❌ Server returned an invalid status code, please try again later"
+        }
+        -- 👉 คุณเพิ่มข้อความอื่น ๆ ได้เรื่อย ๆ ตามที่ API ส่งมา
+    }
+
+    if map[msg] then
+        return map[msg][lang] or map[msg]["EN"]
+    end
+
+    return msg -- ถ้าไม่มีใน mapping ก็ส่งออกตามเดิม
+end
 -------------------------------------------------------------------------------
 -- 📢 ฟังก์ชันแสดงข้อความ
 -------------------------------------------------------------------------------
 local function onMessage(message)
+    local lang = getgenv().Language or "EN"
+    local prefix = Lang.Prefix[lang] or "[Verifying] "
     if getgenv().ReGuiConsole then
-        getgenv().ReGuiConsole:AppendText("[Verifying] " .. tostring(message))
+        getgenv().ReGuiConsole:AppendText(prefix .. tostring(message))
     else
-        print("[Verifying] " .. tostring(message))
+        print(prefix .. tostring(message))
     end
 end
-
 -------------------------------------------------------------------------------
 -- 🔧 ฟังก์ชันระบบภายใน
 -------------------------------------------------------------------------------
@@ -91,17 +119,12 @@ local fRequest, fStringChar, fToString, fStringSub, fOsTime, fMathRandom, fMathF
     math.random,
     math.floor,
     gethwid or function() return game:GetService("Players").LocalPlayer.UserId end
-
 local cachedLink, cachedTime = "", 0
 local host = "https://api.platoboost.com"
-local hostResponse = fRequest({
-    Url = host .. "/public/connectivity",
-    Method = "GET"
-})
+local hostResponse = fRequest({ Url = host .. "/public/connectivity", Method = "GET" })
 if not hostResponse or (hostResponse.StatusCode ~= 200 and hostResponse.StatusCode ~= 429) then
     host = "https://api.platoboost.net"
 end
-
 -- สุ่ม nonce
 local function generateNonce()
     local str = ""
@@ -110,7 +133,6 @@ local function generateNonce()
     end
     return str
 end
-
 -------------------------------------------------------------------------------
 -- ✅ ฟังก์ชัน Verify Key
 -------------------------------------------------------------------------------
@@ -121,17 +143,14 @@ local function verifyKey(key)
     else
         requestSending = true
     end
-
     local nonce = generateNonce()
     local endpoint = host .. "/public/whitelist/" .. fToString(service) ..
         "?identifier=" .. lDigest(fGetHwid()) .. "&key=" .. key
     if useNonce then
         endpoint = endpoint .. "&nonce=" .. nonce
     end
-
     local response = fRequest({ Url = endpoint, Method = "GET" })
     requestSending = false
-
     if response and response.StatusCode == 200 then
         local decoded = lDecode(response.Body)
         if decoded.success == true then
@@ -153,7 +172,7 @@ local function verifyKey(key)
                 return false
             end
         else
-            onMessage("⚠️ " .. decoded.message)
+            onMessage(translateAPI(decoded.message))
             return false
         end
     elseif response and response.StatusCode == 429 then
@@ -164,20 +183,14 @@ local function verifyKey(key)
         return false
     end
 end
-
 -------------------------------------------------------------------------------
 -- 🎟️ ฟังก์ชัน Redeem Key
 -------------------------------------------------------------------------------
 local function redeemKey(key)
     local nonce = generateNonce()
     local endpoint = host .. "/public/redeem/" .. fToString(service)
-    local body = {
-        identifier = lDigest(fGetHwid()),
-        key = key
-    }
-    if useNonce then
-        body.nonce = nonce
-    end
+    local body = { identifier = lDigest(fGetHwid()), key = key }
+    if useNonce then body.nonce = nonce end
 
     local response = fRequest({
         Url = endpoint,
@@ -185,7 +198,6 @@ local function redeemKey(key)
         Body = lEncode(body),
         Headers = { ["Content-Type"] = "application/json" }
     })
-
     if response and response.StatusCode == 200 then
         local decoded = lDecode(response.Body)
         if decoded.success == true then
@@ -221,7 +233,6 @@ local function redeemKey(key)
         return false
     end
 end
-
 -------------------------------------------------------------------------------
 -- 🔑 ฟังก์ชัน Redeem & Verify
 -------------------------------------------------------------------------------
@@ -243,7 +254,6 @@ function api.redeemAndVerify(key)
         return false
     end
 end
-
 -------------------------------------------------------------------------------
 -- 🚀 Auto Run
 -------------------------------------------------------------------------------
