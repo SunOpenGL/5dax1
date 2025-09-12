@@ -227,7 +227,9 @@ function api.redeemAndVerify(key)
         local verified = verifyKey(key)
         if verified then
             onMessage(T("KeyValidVerified"))
-            startKeyTimer() 
+            if getgenv().startKeyTimer then
+                getgenv().startKeyTimer()
+            end
             return true
         else
             onMessage(T("VerifyFailed"))
