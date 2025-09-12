@@ -1,5 +1,5 @@
-getgenv().ScriptKey = "KEY_Day2044ttt" -- ถ้าไม่มีคีย์ ให้รันครั้งแรกก่อน
-getgenv().Language = "EN" -- TH/EN
+getgenv().ScriptKey = "KEY_Day2044" -- ถ้าไม่มีคีย์ ให้รันครั้งแรกก่อน
+getgenv().Language = "TH" -- TH/EN
 getgenv().Settings = {
     AutoExec = true,                      -- เปิดระบบ AutoExec
     KillPlayer_WhenAllGeneratorsDone = true,   -- ฆ่าผู้เล่นถ้าซ่อมหมดแล้ว
@@ -121,19 +121,9 @@ local function AutoExecOnTeleport()
     if not getgenv().Settings or not getgenv().Settings.AutoExec then
         return
     end
-
-    -- encode settings เป็น string ปลอดภัย
-    local settingsJson = game:GetService("HttpService"):JSONEncode(getgenv().Settings or {})
-
-    local execCode = string.format([[
-        getgenv().ScriptKey = %q
-        getgenv().Language  = %q
-        getgenv().Settings  = game:GetService("HttpService"):JSONDecode(%q)
+    local execCode = [[
         loadstring(game:HttpGet("https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/1xe1d"))()
-    ]],
-    tostring(getgenv().ScriptKey or ""),
-    tostring(getgenv().Language or "EN"),
-    settingsJson)
+    ]]
 
     if queue_on_teleport then
         queue_on_teleport(execCode)
