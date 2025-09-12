@@ -197,7 +197,7 @@ local function redeemKey(key)
                 onMessage(T("AlreadyActive"))
                 return false
             else
-                onMessage("⚠️ " .. decoded.message)
+                onMessage(T("KeyInvalid"))
                 return false
             end
         end
