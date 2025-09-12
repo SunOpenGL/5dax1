@@ -245,7 +245,7 @@ local function redeemKey(key)
 end
 local OnMSGDay2044 = function(message)
     if getgenv().ReGuiConsole then
-        getgenv().ReGuiConsole:Print("[Verifying] " .. tostring(message))
+        getgenv().ReGuiConsole:AppendText("[Verifying] " .. tostring(message) .. "\n")
     else
         print("[Verifying] " .. tostring(message))
     end
