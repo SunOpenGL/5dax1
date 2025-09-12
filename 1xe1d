@@ -1,11 +1,3 @@
-getgenv().ScriptKey = "KEY_Day2044" --ใส่ Key ของคุณแต่ถ้าไม่มีคีย์ให้รันสคริปต์ก่อนนึงรอบคุณจะได้ลิงก์ไปหา Key
-getgenv().Language = "EN" --TH/EN ภาษาไทย[TH] และ/and English[EN]
-getgenv().Settings = {
-	KillPlayer_WhenAllGeneratorsDone  = true,  -- จะฆ่าผู้เล่นต่อเมื่อเราซ่อมเครื่องปั่นไฟหมดแล้ว
-    ServerHop_WhenAllGeneratorsDone  = true,    -- จะย้ายเซิร์ฟเวอร์เมื่อซ่อมเครื่องปั่นไฟหมดแล้ว
-    FixDelay   = 1.5,                -- หน่วงเวลาในการซ่อม [อย่าต่ำเกินจะโดนเตะ]
-}
-
 if getgenv()._OcyBuxHUBForSaKenS0x9 then return end
 getgenv()._OcyBuxHUBForSaKenS0x9 = true
 if not game:IsLoaded() then game.Loaded:Wait() end
