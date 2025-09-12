@@ -126,16 +126,19 @@ function TeleportAutoExec()
     local scriptKey  = getgenv().ScriptKey or ""
     local language   = getgenv().Language or "EN"
     local settings   = getgenv().Settings or {}
+
+    -- encode แล้ว decode กลับตอนรัน
     local fullCode = string.format([[
         getgenv().ScriptKey = %q
         getgenv().Language  = %q
-        getgenv().Settings  = %s
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/RTX_"))()
+        getgenv().Settings  = game:GetService("HttpService"):JSONDecode(%q)
+        loadstring(game:HttpGet("https://github.com/SunOpenGL/5dax1/raw/refs/heads/main/1xe1d"))()
     ]],
         scriptKey,
         language,
-        HttpService:JSONEncode(settings)
+        game:GetService("HttpService"):JSONEncode(settings)
     )
+
     queue_on_teleport(fullCode)
     warn("[Forsaken] TeleportAutoExec saved ✅")
 end
