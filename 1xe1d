@@ -1,12 +1,23 @@
+-- 🌐 ตั้งค่าเริ่มต้น
+getgenv().ScriptKey = "KEY_Day2044" -- ถ้าไม่มีคีย์ ให้รันครั้งแรกก่อน
+getgenv().Language = "EN" -- TH/EN
+getgenv().Settings = {
+    AutoExec = true,                      -- เปิดระบบ AutoExec
+    KillPlayer_WhenAllGeneratorsDone = true,   -- ฆ่าผู้เล่นถ้าซ่อมหมดแล้ว
+    ServerHop_WhenAllGeneratorsDone = false,  -- ย้ายเซิร์ฟถ้าซ่อมหมดแล้ว
+    FixDelay = 1.5,                       -- หน่วงเวลาในการซ่อม
+}
+if getgenv()._OcyBuxHUBForSaKenS0x9 then return end
+getgenv()._OcyBuxHUBForSaKenS0x9 = true
+if not game:IsLoaded() then game.Loaded:Wait() end
+if not game:IsLoaded() then repeat task.wait() until game:IsLoaded() end
 local api = loadstring(game:HttpGet("https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/RTX_"))()
-if getgenv().ExistingWindow and typeof(getgenv().ExistingWindow.Close) == "function" then
-	getgenv().ExistingWindow:Close()
-end
 local InsertService = game:GetService("InsertService")
+local HttpService = game:GetService("HttpService")
 local ReGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/depthso/Dear-ReGui/refs/heads/main/ReGui.lua'))()
 local PrefabsId = "rbxassetid://" .. ReGui.PrefabsId
 ReGui:Init({
-	Prefabs = InsertService:LoadLocalAsset(PrefabsId)
+    Prefabs = InsertService:LoadLocalAsset(PrefabsId)
 })
 ReGui:DefineTheme("Cherry", {
     TextSize = 22,
@@ -31,17 +42,40 @@ ReGui:DefineTheme("Cherry", {
     RegionBgTransparency = 1,
 })
 local Window = ReGui:Window({
-    Title = "OcyBux [Forsaken] Ver.KaiTan V1",
+    Title = "OcyBux [Forsaken] Ver.KaiTan V1.0",
     Theme = "Cherry",
-    NoClose = false,
+    NoClose = true,
     NoResize = false,
     NoMove = false,
     NoCollapse = false,
     Size = UDim2.fromOffset(430, 280),
 }):Center()
-local KEY_DURATION = 6 * 60 * 60 
-local KEY_FILE = "KeyExpire.json"
-getgenv().KeyExpireTime = nil
+local KEY_DURATION = 8 * 60 * 60 
+local KEY_FILE = "OB_LastKey.json"         -- เก็บตัวคีย์
+local KEY_EXPIRE_FILE = "OB_KeyExpire.json" -- เก็บเวลาหมดอายุ
+local function saveKey(key) writefile(KEY_FILE, key) end
+local function loadKey() return isfile(KEY_FILE) and readfile(KEY_FILE) or nil end
+if getgenv().ScriptKey and getgenv().ScriptKey ~= "" then
+    saveKey(getgenv().ScriptKey)
+else
+    local savedKey = loadKey()
+    if savedKey then getgenv().ScriptKey = savedKey end
+end
+local function saveKeyExpireTime()
+    if getgenv().KeyExpireTime then
+        writefile(KEY_EXPIRE_FILE, tostring(getgenv().KeyExpireTime))
+    end
+end
+local function loadKeyExpireTime()
+    if isfile(KEY_EXPIRE_FILE) then
+        local saved = tonumber(readfile(KEY_EXPIRE_FILE))
+        if saved and saved > os.time() then
+            getgenv().KeyExpireTime = saved
+            return true
+        end
+    end
+    return false
+end
 local KeyLabel = Window:Label({
     Text = (getgenv().Language == "TH" and "🔑 สถานะคีย์: กำลังโหลด..." or "🔑 Key Status: Loading...")
 })
@@ -51,21 +85,6 @@ local function formatTimeLeft(seconds)
     local m = math.floor((seconds % 3600) / 60)
     local s = seconds % 60
     return string.format("%02d:%02d:%02d", h, m, s)
-end
-local function saveKeyExpireTime()
-    if getgenv().KeyExpireTime then
-        writefile(KEY_FILE, tostring(getgenv().KeyExpireTime))
-    end
-end
-local function loadKeyExpireTime()
-    if isfile(KEY_FILE) then
-        local saved = tonumber(readfile(KEY_FILE))
-        if saved and saved > os.time() then
-            getgenv().KeyExpireTime = saved
-            return true
-        end
-    end
-    return false
 end
 getgenv().startKeyTimer = function()
     if not loadKeyExpireTime() then
@@ -79,7 +98,7 @@ getgenv().startKeyTimer = function()
             if left <= 0 then
                 getgenv().KeyLabel.Text = "❌ Key Expired/กุญแจหมดอายุ"
                 getgenv().KeyExpireTime = nil
-                delfile(KEY_FILE)
+                delfile(KEY_EXPIRE_FILE)
                 break
             else
                 local lang = getgenv().Language or "EN"
@@ -94,9 +113,33 @@ getgenv().startKeyTimer = function()
     end)
 end
 local Console = Window:Console({
-    LineNumbers = true
+    LineNumbers = true,
+    AutoScroll = true,
+    MaxLines = 200,
+    Size = UDim2.new(1, 0, 1, 0),
+    Position = UDim2.new(0, 0, 0, 0),
+    RichText = true,
+    ReadOnly = true
 })
 getgenv().ReGuiConsole = Console
+local function AutoExecOnTeleport()
+    if not getgenv().Settings or not getgenv().Settings.AutoExec then
+        return
+    end
+    local savedKey = loadKey()
+    if savedKey then getgenv().ScriptKey = savedKey end
+    local settingsJson = HttpService:JSONEncode(getgenv().Settings)
+    local execCode = string.format([[
+        getgenv().ScriptKey = %q
+        getgenv().Language = %q
+        getgenv().Settings = game:GetService("HttpService"):JSONDecode(%q)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/RTX_"))()
+    ]], getgenv().ScriptKey, getgenv().Language, settingsJson)
+
+    if queue_on_teleport then
+        queue_on_teleport(execCode)
+    end
+end
 local function Run_AutoFix()
     print("✅ Key Verified → เริ่ม AutoFixGen")
     getgenv().DebugForsaken = true
@@ -156,10 +199,178 @@ local function Run_AutoFix()
     local Players = game:GetService("Players")
     local LocalPlayer = Players.LocalPlayer
     local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local TeleportService = game:GetService("TeleportService")
+	local CoreGui = game:GetService("CoreGui")
     local Network = require(ReplicatedStorage.Modules.Network)
     local Survivors = workspace.Players:WaitForChild("Survivors")
     local INVIS_ANIM2 = "75804462760596"
     local crawlAnimTrack
+	--Api Serverhop by DayToDay2044
+local DebugMode = false
+local function setDebug(state: boolean)
+    DebugMode = state
+end
+local Logger = {}
+function Logger.debug(...)
+    if DebugMode then
+        warn("[DEBUG]", ...)
+    end
+end
+local cookie = getgenv().RobloxCookie or "YOUR_COOKIE_KEY" -- กุญแจคุกกี้ขอนะจะใส่ไม่ใส่ก็เรื่องของคุณครับ
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local request = (syn and syn.request) or http_request or request or (fluxus and fluxus.request)
+if not request then
+    Logger.debug("ไม่มี request function รองรับ")
+    return
+end
+local folder = "ServerLogs"
+if not isfolder(folder) then makefolder(folder) end
+local cacheFile = string.format("%s/JobIds_%d.json", folder, game.PlaceId)
+local visitedFile = string.format("%s/Visited_%d.json", folder, game.PlaceId)
+local function LoadJson(path)
+    if not isfile(path) then return {} end
+    local ok, data = pcall(function()
+        return HttpService:JSONDecode(readfile(path))
+    end)
+    return ok and data or {}
+end
+local function SaveJson(path, data)
+    local ok, err = pcall(function()
+        writefile(path, HttpService:JSONEncode(data))
+    end)
+    if not ok then Logger.debug("SaveJson error:", err) end
+end
+local function Rejoin()
+    Logger.debug("Random Rejoin เพราะ cache/โหลดเซิร์ฟล้มเหลวหรือหมดหน้าแล้ว")
+    TeleportService:Teleport(game.PlaceId, LocalPlayer)
+	AutoExecOnTeleport()
+end
+local function GetServers(cursor)
+    local url = ("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100%s")
+        :format(game.PlaceId, cursor and ("&cursor=" .. cursor) or "")
+    local response = request({
+        Url = url,
+        Method = "GET",
+        Headers = {
+            ["User-Agent"] = "Roblox/WinInet",
+            ["Accept"] = "application/json",
+            ["Referer"] = "https://www.roblox.com/games/" .. game.PlaceId,
+            ["Origin"] = "https://www.roblox.com",
+			--["Cookie"] = ".ROBLOSECURITY=" .. cookie
+        }
+    })
+    if not response then
+        Logger.debug("GetServers ล้มเหลว: ไม่มี response")
+        return nil
+    end
+    if response.StatusCode == 429 then
+        Logger.debug("เจอ 429 → Rejoin")
+        Rejoin()
+        return nil
+    end
+    if response.StatusCode ~= 200 or not response.Body then
+        Logger.debug("GetServers ล้มเหลว | Status:", response.StatusCode)
+        Rejoin()
+        return nil
+    end
+    local ok, data = pcall(function()
+        return HttpService:JSONDecode(response.Body)
+    end)
+    return ok and data or nil
+end
+local function CacheJobIds(cursor)
+    local servers = GetServers(cursor)
+    if not servers or not servers.data or #servers.data == 0 then
+        Rejoin()
+        return false
+    end
+    local jobs = {}
+    for _, server in ipairs(servers.data) do
+        if server.id then table.insert(jobs, server.id) end
+    end
+    local cache = {
+        jobs = jobs,
+        nextCursor = servers.nextPageCursor
+    }
+    SaveJson(cacheFile, cache)
+    Logger.debug(("โหลด %d เซิร์ฟ ลงไฟล์ | nextCursor=%s"):format(#jobs, tostring(servers.nextPageCursor)))
+    return true
+end
+local function TeleportFromCache()
+    local cache = LoadJson(cacheFile)
+    local visited = LoadJson(visitedFile)
+    local jobs = cache.jobs or {}
+    if not jobs or #jobs == 0 then
+        Logger.debug("ยังไม่มี cache → โหลดหน้าแรก")
+        if not CacheJobIds(nil) then return end
+        cache = LoadJson(cacheFile)
+        jobs = cache.jobs or {}
+    end
+    local filtered = {}
+    for _, id in ipairs(jobs) do
+        if id ~= game.JobId and not table.find(visited, id) then
+            table.insert(filtered, id)
+        end
+    end
+    if #filtered == 0 then
+        if cache.nextCursor then
+            Logger.debug("Cache หมด → โหลดหน้าถัดไปด้วย nextCursor")
+            if not CacheJobIds(cache.nextCursor) then return end
+            cache = LoadJson(cacheFile)
+            jobs = cache.jobs or {}
+            for _, id in ipairs(jobs) do
+                if id ~= game.JobId and not table.find(visited, id) then
+                    table.insert(filtered, id)
+                end
+            end
+        else
+            Logger.debug("ไม่มี nextCursor แล้ว → Rejoin")
+            Rejoin()
+            return
+        end
+    end
+    if #filtered == 0 then
+        Logger.debug("ไม่มีเซิร์ฟเวอร์ใหม่ → Rejoin")
+        Rejoin()
+        return
+    end
+    local jobId = filtered[math.random(1, #filtered)]
+    table.insert(visited, jobId)
+    SaveJson(visitedFile, visited)
+    Logger.debug("วาร์ปไป JobId:", jobId)
+    TeleportService:TeleportToPlaceInstance(game.PlaceId, jobId, LocalPlayer)
+	AutoExecOnTeleport()
+end
+setDebug(false) -- ฟังชั่นเปิดปิด /debug.warn()
+		local function rejoinServer()
+		local placeId = game.PlaceId
+		local jobId = game.JobId
+		task.spawn(function()
+			pcall(function()
+				TeleportService:TeleportToPlaceInstance(placeId, jobId, LocalPlayer)
+				AutoExecOnTeleport()
+			end)
+			task.wait(3)
+			TeleportService:Teleport(placeId, LocalPlayer)
+			AutoExecOnTeleport()
+		end)
+	end
+	CoreGui.RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+		if child.Name == "ErrorPrompt" then
+			print("⚠️ ErrorPrompt detected → Rejoining...")
+			task.wait(1)
+			rejoinServer()
+		end
+	end)
+	LocalPlayer.OnTeleport:Connect(function(state)
+		if state == Enum.TeleportState.Failed then
+			print("⚠️ Teleport Failed → retrying rejoin...")
+			task.delay(2, rejoinServer)
+		end
+	end)
     local function playInvisAnim()
         local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
         local hum = char:WaitForChild("Humanoid")
@@ -282,7 +493,7 @@ local function Run_AutoFix()
                 LoggerForsaken.debug(T("START_FIX", gen.Name, entry.part.Name))
                 local loopRunning = true
                 task.spawn(function()
-                    while loopRunning and getgenv().Settings.AutoFixGen and gen.Parent and progress.Value < 100 do
+                    while loopRunning and gen.Parent and progress.Value < 100 do
                         RE:FireServer("finishedPuzzle")
                         task.wait(getgenv().Settings.FixDelay)
                     end
@@ -298,12 +509,15 @@ local function Run_AutoFix()
                     if getgenv().Settings.KillPlayer_WhenAllGeneratorsDone then
                         LoggerForsaken.debug(T("KILL"))
                         local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                        if hum then hum.Health = 0 end
-                    elseif getgenv().Settings.ServerHop_WhenAllGeneratorsDone then
-                        LoggerForsaken.debug(T("HOP"))
-                        hopServer()
-                    end
-                end
+                    if hum then hum.Health = 0
+					end
+					if getgenv().Settings.ServerHop_WhenAllGeneratorsDone then
+						LoggerForsaken.debug(T("HOP"))
+						TeleportFromCache()
+						AutoExecOnTeleport()
+						end
+					end
+				end
                 return true
             end
         end
@@ -314,15 +528,11 @@ local function Run_AutoFix()
         loopRunning = true
         task.spawn(function()
             while loopRunning do
-                if getgenv().Settings.AutoFixGen then
-                    local gen = getNearestGenerator()
-                    if gen then
-                        tryFixGen(gen)
-                    else
-                        LoggerForsaken.debug(T("NO_GEN"))
-                        task.wait(0.25)
-                    end
+                local gen = getNearestGenerator()
+                if gen then
+                    tryFixGen(gen)
                 else
+                    LoggerForsaken.debug(T("NO_GEN"))
                     task.wait(0.25)
                 end
             end
