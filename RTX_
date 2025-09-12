@@ -65,14 +65,12 @@ local Lang = {
         EN = "❌ Integrity check failed"
     }
 }
-
--- ฟังก์ชันเลือกข้อความตามภาษา
 local function T(key)
     local lang = getgenv().Language or "EN"
     return Lang[key] and (Lang[key][lang] or Lang[key]["EN"]) or key
-endlocal function translateAPI(msg)
+end
+local function translateAPI(msg)
     local lang = getgenv().Language or "EN"
-
     local map = {
         ["key is invalid."] = {
             TH = "❌ คีย์ไม่ถูกต้อง",
@@ -86,14 +84,11 @@ endlocal function translateAPI(msg)
             TH = "❌ เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง กรุณาลองใหม่ภายหลัง",
             EN = "❌ Server returned an invalid status code, please try again later"
         }
-        -- 👉 คุณเพิ่มข้อความอื่น ๆ ได้เรื่อย ๆ ตามที่ API ส่งมา
     }
-
     if map[msg] then
         return map[msg][lang] or map[msg]["EN"]
     end
-
-    return msg -- ถ้าไม่มีใน mapping ก็ส่งออกตามเดิม
+    return msg -- ถ้าไม่มีใน mapping
 end
 -------------------------------------------------------------------------------
 -- 📢 ฟังก์ชันแสดงข้อความ
