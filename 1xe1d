@@ -1,0 +1,386 @@
+local api = loadstring(game:HttpGet("https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/RTX_"))()
+if getgenv().ExistingWindow and typeof(getgenv().ExistingWindow.Close) == "function" then
+	getgenv().ExistingWindow:Close()
+end
+local InsertService = game:GetService("InsertService")
+local ReGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/depthso/Dear-ReGui/refs/heads/main/ReGui.lua'))()
+local PrefabsId = "rbxassetid://" .. ReGui.PrefabsId
+ReGui:Init({
+	Prefabs = InsertService:LoadLocalAsset(PrefabsId)
+})
+ReGui:DefineTheme("Cherry", {
+    TextSize = 22,
+    TitleAlign = Enum.TextXAlignment.Center,
+    TextDisabled = Color3.fromRGB(120, 100, 120),
+    Text = Color3.fromRGB(200, 180, 200),
+    FrameBg = Color3.fromRGB(25, 20, 25),
+    FrameBgTransparency = 0.4,
+    FrameBgActive = Color3.fromRGB(120, 100, 120),
+    FrameBgTransparencyActive = 0.4,
+    CheckMark = Color3.fromRGB(150, 100, 150),
+    SliderGrab = Color3.fromRGB(150, 100, 150),
+    ButtonsBg = Color3.fromRGB(0, 255, 120),
+    CollapsingHeaderBg = Color3.fromRGB(150, 100, 150),
+    CollapsingHeaderText = Color3.fromRGB(200, 180, 200),
+    RadioButtonHoveredBg = Color3.fromRGB(150, 100, 150),
+    WindowBg = Color3.fromRGB(35, 30, 35),
+    TitleBarBg = Color3.fromRGB(35, 30, 35),
+    TitleBarBgActive = Color3.fromRGB(50, 45, 50),
+    Border = Color3.fromRGB(50, 45, 50),
+    ResizeGrab = Color3.fromRGB(255, 0, 0),
+    RegionBgTransparency = 1,
+})
+local Window = ReGui:Window({
+    Title = "OcyBux [Forsaken] Ver.KaiTan V1",
+    Theme = "Cherry",
+    NoClose = false,
+    NoResize = false,
+    NoMove = false,
+    NoCollapse = false,
+    Size = UDim2.fromOffset(430, 280),
+}):Center()
+local KEY_DURATION = 6 * 60 * 60 
+local KEY_FILE = "KeyExpire.json"
+getgenv().KeyExpireTime = nil
+local KeyLabel = Window:Label({
+    Text = (getgenv().Language == "TH" and "🔑 สถานะคีย์: กำลังโหลด..." or "🔑 Key Status: Loading...")
+})
+getgenv().KeyLabel = KeyLabel
+local function formatTimeLeft(seconds)
+    local h = math.floor(seconds / 3600)
+    local m = math.floor((seconds % 3600) / 60)
+    local s = seconds % 60
+    return string.format("%02d:%02d:%02d", h, m, s)
+end
+local function saveKeyExpireTime()
+    if getgenv().KeyExpireTime then
+        writefile(KEY_FILE, tostring(getgenv().KeyExpireTime))
+    end
+end
+local function loadKeyExpireTime()
+    if isfile(KEY_FILE) then
+        local saved = tonumber(readfile(KEY_FILE))
+        if saved and saved > os.time() then
+            getgenv().KeyExpireTime = saved
+            return true
+        end
+    end
+    return false
+end
+getgenv().startKeyTimer = function()
+    if not loadKeyExpireTime() then
+        getgenv().KeyExpireTime = os.time() + KEY_DURATION
+        saveKeyExpireTime()
+    end
+    task.spawn(function()
+        while getgenv().KeyExpireTime do
+            local now = os.time()
+            local left = getgenv().KeyExpireTime - now
+            if left <= 0 then
+                getgenv().KeyLabel.Text = "❌ Key Expired/กุญแจหมดอายุ"
+                getgenv().KeyExpireTime = nil
+                delfile(KEY_FILE)
+                break
+            else
+                local lang = getgenv().Language or "EN"
+                if lang == "TH" then
+                    getgenv().KeyLabel.Text = "⏳ เวลาคีย์ที่เหลือ: " .. formatTimeLeft(left)
+                else
+                    getgenv().KeyLabel.Text = "⏳ Key Time Left: " .. formatTimeLeft(left)
+                end
+            end
+            task.wait(1)
+        end
+    end)
+end
+local Console = Window:Console({
+    LineNumbers = true
+})
+getgenv().ReGuiConsole = Console
+local function Run_AutoFix()
+    print("✅ Key Verified → เริ่ม AutoFixGen")
+    getgenv().DebugForsaken = true
+    local DebugMode = false
+    getgenv().LogQueue = getgenv().LogQueue or {}
+    task.spawn(function()
+        while task.wait(0.1) do
+            if getgenv().ReGuiConsole then
+                for _, v in ipairs(getgenv().LogQueue) do
+                    getgenv().ReGuiConsole:AppendText(v)
+                end
+                table.clear(getgenv().LogQueue)
+            end
+        end
+    end)
+    local LangMap = {
+        TH = {
+            START_FIX = "🔧 เริ่มซ่อม: %s ที่ %s",
+            DONE_FIX  = "✅ ซ่อมเสร็จ: %s",
+            ALL_DONE  = "⚡ เครื่องปั่นไฟทั้งหมดเสร็จแล้ว",
+            KILL      = "💀 ฆ่าตัวละครตามตั้งค่า",
+            HOP       = "🌐 ย้ายเซิร์ฟเวอร์",
+            STATE_SURVIVOR = "🟢 ผู้รอดชีวิต → เริ่ม AutoFix",
+            STATE_SPECTATE = "👀 กำลัง Spectate → ไม่ทำงาน",
+            STATE_KILLER   = "🔪 Killer → โจมตีตรง ๆ",
+            STATE_UNKNOWN  = "❓ ทีมไม่รู้จัก: %s",
+            MAP_LOADED     = "🗺️ โหลดแผนที่: %s",
+            NO_GEN         = "⚠️ ไม่มี Generator ให้ซ่อม",
+            SERVER_FULL    = "⚠️ เซิร์ฟเวอร์เต็ม / วาร์ปล้มเหลว → ลองใหม่",
+            SERVER_SUCCESS = "🌐 วาร์ปสำเร็จ → %s",
+        },
+        EN = {
+            START_FIX = "🔧 Started fixing: %s at %s",
+            DONE_FIX  = "✅ Done fixing: %s",
+            ALL_DONE  = "⚡ All generators are finished",
+            KILL      = "💀 Kill character as configured",
+            HOP       = "🌐 Hopping server",
+            STATE_SURVIVOR = "🟢 Survivor → Start AutoFix",
+            STATE_SPECTATE = "👀 Spectating → Do nothing",
+            STATE_KILLER   = "🔪 Killer → Direct attack",
+            STATE_UNKNOWN  = "❓ Unknown team: %s",
+            MAP_LOADED     = "🗺️ Map Loaded: %s",
+            NO_GEN         = "⚠️ No Generator to fix",
+            SERVER_FULL    = "⚠️ Server full / Teleport failed → Retry",
+            SERVER_SUCCESS = "🌐 Teleport success → %s",
+        }
+    }
+    local function T(key, ...)
+        local lang = (getgenv().Language == "TH") and "TH" or "EN"
+        local template = LangMap[lang][key] or key
+        return string.format(template, ...)
+    end
+    local LoggerForsaken = {}
+    function LoggerForsaken.debug(msg)
+        table.insert(getgenv().LogQueue, msg)
+    end
+    local Players = game:GetService("Players")
+    local LocalPlayer = Players.LocalPlayer
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
+    local Network = require(ReplicatedStorage.Modules.Network)
+    local Survivors = workspace.Players:WaitForChild("Survivors")
+    local INVIS_ANIM2 = "75804462760596"
+    local crawlAnimTrack
+    local function playInvisAnim()
+        local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local hum = char:WaitForChild("Humanoid")
+        if hum then
+            local anim = Instance.new("Animation")
+            anim.AnimationId = "rbxassetid://"..INVIS_ANIM2
+            local track = hum:LoadAnimation(anim)
+            track.Priority = Enum.AnimationPriority.Action4
+            track:Play()
+            track:AdjustSpeed(0)
+            track:AdjustWeight(1)
+            crawlAnimTrack = track
+        end
+    end
+    local AnimMap = {
+        ["rbxassetid://82691533602949"] = "Center",
+        ["rbxassetid://122604262087779"] = "Left",
+        ["rbxassetid://130355934640695"] = "Right",
+    }
+    local function getOccupiedSlots()
+        local occupied = {}
+        for _, survivor in ipairs(Survivors:GetChildren()) do
+            if survivor ~= LocalPlayer.Character then
+                local hum = survivor:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    for _, track in ipairs(hum:GetPlayingAnimationTracks()) do
+                        local animId = track.Animation and track.Animation.AnimationId
+                        if animId and AnimMap[animId] then
+                            occupied[AnimMap[animId]] = true
+                        end
+                    end
+                end
+            end
+        end
+        return occupied
+    end
+    local function getAllPositions(gen, hrp)
+        local posFolder = gen:FindFirstChild("Positions")
+        if not (posFolder and hrp) then return {} end
+        local result = {}
+        for _, p in ipairs(posFolder:GetChildren()) do
+            if p:IsA("BasePart") then
+                table.insert(result, {part = p, name = p.Name, dist = (hrp.Position - p.Position).Magnitude})
+            end
+        end
+        table.sort(result, function(a,b) return a.dist < b.dist end)
+        return result
+    end
+    local function getNearestGenerator()
+        local char = LocalPlayer.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if not hrp then return nil end
+        local ok, mapFolder = pcall(function()
+            return workspace.Map.Ingame:FindFirstChild("Map")
+        end)
+        if not ok or not mapFolder then return nil end
+        local nearest, shortest = nil, math.huge
+        for _, gen in ipairs(mapFolder:GetChildren()) do
+            if gen:IsA("Model") and gen.Name == "Generator" then
+                local prog = gen:FindFirstChild("Progress")
+                if prog and prog.Value < 100 then
+                    local positions = getAllPositions(gen, hrp)
+                    if #positions > 0 then
+                        local dist = positions[1].dist
+                        if dist < shortest then
+                            shortest, nearest = dist, gen
+                        end
+                    end
+                end
+            end
+        end
+        return nearest
+    end
+    local function teleportTo(posPart)
+        local char = LocalPlayer.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if hrp and posPart then
+            hrp.CFrame = CFrame.new(posPart.Position)
+        end
+    end
+    local function isSurvivor()
+        local char = LocalPlayer.Character
+        if not char then return false end
+        return char.Parent == workspace.Players.Survivors
+    end
+    local function allGeneratorsDone()
+        if not gameStarted then return false end
+        if not isSurvivor() then return false end
+        local ok, mapFolder = pcall(function()
+            return workspace.Map.Ingame:FindFirstChild("Map")
+        end)
+        if not ok or not mapFolder then return false end
+        for _, gen in ipairs(mapFolder:GetChildren()) do
+            if gen:IsA("Model") and gen.Name == "Generator" then
+                local prog = gen:FindFirstChild("Progress")
+                if prog and prog.Value < 100 then
+                    return false
+                end
+            end
+        end
+        return true
+    end
+    local currentFixing = nil
+    local function tryFixGen(gen)
+        if currentFixing == gen then return end
+        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if not hrp then return end
+        local positions = getAllPositions(gen, hrp)
+        local rem = gen:FindFirstChild("Remotes")
+        local RF = rem and rem:FindFirstChild("RF")
+        local RE = rem and rem:FindFirstChild("RE")
+        local progress = gen:FindFirstChild("Progress")
+        if not (RF and RE and progress) then return end
+        for _, entry in ipairs(positions) do
+            teleportTo(entry.part)
+            task.wait(0.5)
+            local ok, res = pcall(function() return RF:InvokeServer("enter") end)
+            if ok and res == "fixing" then
+                currentFixing = gen
+                LoggerForsaken.debug(T("START_FIX", gen.Name, entry.part.Name))
+                local loopRunning = true
+                task.spawn(function()
+                    while loopRunning and getgenv().Settings.AutoFixGen and gen.Parent and progress.Value < 100 do
+                        RE:FireServer("finishedPuzzle")
+                        task.wait(getgenv().Settings.FixDelay)
+                    end
+                end)
+                while progress.Value < 100 do
+                    progress:GetPropertyChangedSignal("Value"):Wait()
+                end
+                loopRunning = false
+                LoggerForsaken.debug(T("DONE_FIX", gen.Name))
+                currentFixing = nil
+                if allGeneratorsDone() then
+                    LoggerForsaken.debug(T("ALL_DONE"))
+                    if getgenv().Settings.KillPlayer_WhenAllGeneratorsDone then
+                        LoggerForsaken.debug(T("KILL"))
+                        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+                        if hum then hum.Health = 0 end
+                    elseif getgenv().Settings.ServerHop_WhenAllGeneratorsDone then
+                        LoggerForsaken.debug(T("HOP"))
+                        hopServer()
+                    end
+                end
+                return true
+            end
+        end
+    end
+    local loopRunning = false
+    local function startAutoFixLoop()
+        if loopRunning then return end
+        loopRunning = true
+        task.spawn(function()
+            while loopRunning do
+                if getgenv().Settings.AutoFixGen then
+                    local gen = getNearestGenerator()
+                    if gen then
+                        tryFixGen(gen)
+                    else
+                        LoggerForsaken.debug(T("NO_GEN"))
+                        task.wait(0.25)
+                    end
+                else
+                    task.wait(0.25)
+                end
+            end
+        end)
+    end
+    local function stopAutoFixLoop() loopRunning = false end
+    local function checkTeam()
+        local char = LocalPlayer.Character
+        if not char then return end
+        local parent = char.Parent
+        if parent == workspace.Players.Spectating then
+            LoggerForsaken.debug(T("STATE_SPECTATE"))
+            stopAutoFixLoop()
+        elseif parent == workspace.Players.Survivors then
+            LoggerForsaken.debug(T("STATE_SURVIVOR"))
+            playInvisAnim()
+            stopAutoFixLoop()
+            startAutoFixLoop()
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                hum.Died:Connect(function()
+                    LoggerForsaken.debug("💀 " .. T("STATE_SURVIVOR"))
+                    stopAutoFixLoop()
+                end)
+            end
+        elseif parent == workspace.Players.Killers then
+            LoggerForsaken.debug(T("STATE_KILLER"))
+            stopAutoFixLoop()
+        else
+            LoggerForsaken.debug(T("STATE_UNKNOWN", parent.Name))
+            stopAutoFixLoop()
+        end
+    end
+    local mapEventReceived = false
+    local started = false
+    local function safeStart()
+        if started then return end
+        started = true
+        checkTeam()
+    end
+    Network:SetConnection("ReplicateMapCreation", "REMOTE_EVENT", function(config)
+        local ok, data = pcall(require, config)
+        local mapName = ok and data.DisplayName or config.Name
+        LoggerForsaken.debug(T("MAP_LOADED", mapName))
+        mapEventReceived = true
+        task.spawn(function()
+            task.wait(3)
+            gameStarted = true
+            safeStart()
+        end)
+    end)
+    task.delay(2, function()
+        if not mapEventReceived then safeStart() end
+    end)
+    LocalPlayer.CharacterAdded:Connect(function()
+        task.wait(1)
+        if mapEventReceived then task.wait(3) end
+        checkTeam()
+    end)
+end
+getgenv().OnKeyVerified = Run_AutoFix
