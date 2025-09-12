@@ -171,7 +171,6 @@ local function getFlag(name)
 
     if response and response.StatusCode == 200 then
         local decoded = lDecode(response.Body)
-
         if decoded.success == true then
             if useNonce then
                 if decoded.data.hash == lDigest(fToString(decoded.data.value) .. "-" .. nonce .. "-" .. secret) then
@@ -244,26 +243,33 @@ local function redeemKey(key)
         return false
     end
 end
--------------------------------------------------------------------------------
--- Example usage (print only)
--------------------------------------------------------------------------------
+local OnMSGDay2044 = function(message)
+    if getgenv().ReGuiConsole then
+        getgenv().ReGuiConsole:Print("[Verifying] " .. tostring(message))
+    else
+        print("[Verifying] " .. tostring(message))
+    end
+end
 function api.redeemAndVerify(key)
-    print("[Platoboost] 🔎 Trying redeem...")
+    OnMSGDay2044("🔎 กำลังตรวจสอบคีย์ของคุณ...")
     local redeemed = redeemKey(key)
     if redeemed then
-        print("[Platoboost] 🎉 Redeem success! Now verifying...")
+        OnMSGDay2044("🎉 การ Redeem สำเร็จ! กำลังตรวจสอบความถูกต้องอีกครั้ง...")
         local verified = verifyKey(key)
         if verified then
-            print("[Platoboost] ✅ Key is valid and verified.")
+            OnMSGDay2044("✅ คีย์ถูกต้องและยืนยันสำเร็จแล้ว!")
             return true
         else
-            print("[Platoboost] ❌ Redeem passed but verify failed (check secret/HWID).")
+            OnMSGDay2044("⚠️ Redeem ผ่านแล้ว แต่การตรวจสอบล้มเหลว")
             return false
         end
     else
-        print("[Platoboost] ❌ Redeem failed. Key invalid or already active.")
+        OnMSGDay2044("❌ การ Redeem ล้มเหลว: คีย์ไม่ถูกต้อง หรือถูกใช้งานอยู่แล้ว")
         return false
     end
 end
-
+task.spawn(function()
+    task.wait(1)
+    api.redeemAndVerify(getgenv().ScriptKey)
+end)
 return api
