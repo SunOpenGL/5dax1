@@ -230,6 +230,9 @@ function api.redeemAndVerify(key)
             if getgenv().startKeyTimer then
                 getgenv().startKeyTimer()
             end
+            if getgenv().OnKeyVerified then
+                getgenv().OnKeyVerified()
+            end
             return true
         else
             onMessage(T("VerifyFailed"))
