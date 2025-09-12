@@ -115,24 +115,30 @@ local HttpService = game:GetService("HttpService")
 local request = (syn and syn.request) or http_request or request or (fluxus and fluxus.request)
 -----------------------------
 function TeleportAutoExec()
-    local scriptKey  = getgenv().ScriptKey or ""
-    local language   = getgenv().Language or "EN"
-    local settings   = getgenv().Settings or {}
+    local HttpService = game:GetService("HttpService")
 
-    -- encode แล้ว decode กลับตอนรัน
     local fullCode = string.format([[
+        -- ✅ ฝังค่าปัจจุบันจาก getgenv() ติดไปกับ queue
         getgenv().ScriptKey = %q
         getgenv().Language  = %q
         getgenv().Settings  = game:GetService("HttpService"):JSONDecode(%q)
-        loadstring(game:HttpGet("https://github.com/SunOpenGL/5dax1/raw/refs/heads/main/1xe1d"))()
+
+        -- ✅ โหลดสคริปต์หลัก
+        local src = game:HttpGet("https://github.com/SunOpenGL/5dax1/raw/refs/heads/main/1xe1d")
+        local f, err = loadstring(src)
+        if f then
+            f()
+        else
+            warn("[Forsaken] Load error:", err)
+        end
     ]],
-        scriptKey,
-        language,
-        game:GetService("HttpService"):JSONEncode(settings)
+        tostring(getgenv().ScriptKey or ""),
+        tostring(getgenv().Language or "EN"),
+        HttpService:JSONEncode(getgenv().Settings or {})
     )
 
     queue_on_teleport(fullCode)
-    warn("[Forsaken] TeleportAutoExec saved ✅")
+    warn("[Forsaken] TeleportAutoExec saved ✅", getgenv().Language, getgenv().ScriptKey)
 end
 local function rejoinServer()
 	local placeId = game.PlaceId
