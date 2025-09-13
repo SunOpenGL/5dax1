@@ -11,41 +11,40 @@ local service = 3141
 local secret = "3b599e08-0657-4c14-ab8f-08e89d89ba0c"
 local useNonce = true
 local requestSending = false
+local api = {}
 
 -------------------------------------------------------------------------------
 -- 🌐 Dictionary ภาษา
 -------------------------------------------------------------------------------
 local Lang = {
-    Prefix = {
-        TH = "[กำลังยืนยัน] ",
-        EN = "[Verifying] "
-    },
+    Prefix = { TH = "[กำลังยืนยัน] ", EN = "[Verifying] " },
     ["KeyStatusLoading"] = { TH = "🔑 สถานะคีย์: กำลังโหลด...", EN = "🔑 Key Status: Loading..." },
-    ["CheckingKey"]      = { TH = "🔎 กำลังตรวจสอบคีย์ของคุณ...", EN = "🔎 Checking your key..." },
-    ["RedeemSuccess"]    = { TH = "🎉 Redeem สำเร็จ! กำลังตรวจสอบความถูกต้อง...", EN = "🎉 Redeem success! Verifying..." },
-    ["KeyValid"]         = { TH = "✅ คีย์ถูกต้อง", EN = "✅ Key is valid" },
-    ["KeyValidVerified"] = { TH = "✅ คีย์ถูกต้องและยืนยันสำเร็จแล้ว!", EN = "✅ Key is valid and verified!" },
-    ["KeyInvalid"]       = { TH = "❌ คีย์ไม่ถูกต้อง", EN = "❌ Key is invalid" },
-    ["RedeemFailed"]     = { TH = "❌ Redeem ล้มเหลว: คีย์ไม่ถูกต้องหรือถูกใช้งานแล้ว", EN = "❌ Redeem failed: Key invalid or already in use" },
-    ["VerifyFailed"]     = { TH = "⚠️ Redeem ผ่านแล้ว แต่การตรวจสอบล้มเหลว", EN = "⚠️ Redeem succeeded but verification failed" },
-    ["RateLimit"]        = { TH = "⏳ คุณโดน Rate Limit กรุณารอสักครู่แล้วลองใหม่", EN = "⏳ You are rate limited, please wait and try again" },
-    ["ServerError"]      = { TH = "❌ เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง กรุณาลองใหม่ภายหลัง", EN = "❌ Server returned an invalid response, please try again later" },
-    ["AlreadyActive"]    = { TH = "⚠️ คุณมีคีย์ที่กำลังใช้งานอยู่แล้ว กรุณารอให้หมดอายุก่อน", EN = "⚠️ You already have an active key, wait until it expires" },
-    ["IntegrityError"]   = { TH = "❌ การตรวจสอบล้มเหลว (Integrity Error)", EN = "❌ Integrity check failed" },
-    ["RequestSending"]   = { TH = "⚠️ Request กำลังถูกส่ง กรุณารอ...", EN = "⚠️ Request is being sent, please wait..." },
-    ["ServerMessage"]    = { TH = "⚠️ ข้อความจากเซิร์ฟเวอร์: ", EN = "⚠️ Server message: " },
-    ["KeyInvalidLink"]   = { TH = "❌ คีย์ไม่ถูกต้อง! ลิงก์ keysystem ถูกก๊อปปี้แล้ว: ", EN = "❌ Invalid key! Keysystem link copied: " },
+    ["CheckingKey"]     = { TH = "🔎 กำลังตรวจสอบคีย์ของคุณ...", EN = "🔎 Checking your key..." },
+    ["RedeemSuccess"]   = { TH = "🎉 Redeem สำเร็จ! กำลังตรวจสอบความถูกต้อง...", EN = "🎉 Redeem success! Verifying..." },
+    ["KeyValid"]        = { TH = "✅ คีย์ถูกต้อง", EN = "✅ Key is valid" },
+    ["KeyValidVerified"]= { TH = "✅ คีย์ถูกต้องและยืนยันสำเร็จแล้ว!", EN = "✅ Key is valid and verified!" },
+    ["KeyInvalid"]      = { TH = "❌ คีย์ไม่ถูกต้อง", EN = "❌ Key is invalid" },
+    ["RedeemFailed"]    = { TH = "❌ Redeem ล้มเหลว: คีย์ไม่ถูกต้องหรือถูกใช้งานแล้ว", EN = "❌ Redeem failed: Key invalid or already in use" },
+    ["VerifyFailed"]    = { TH = "⚠️ Redeem ผ่านแล้ว แต่การตรวจสอบล้มเหลว", EN = "⚠️ Redeem succeeded but verification failed" },
+    ["RateLimit"]       = { TH = "⏳ คุณโดน Rate Limit กรุณารอสักครู่แล้วลองใหม่", EN = "⏳ You are rate limited, please wait and try again" },
+    ["ServerError"]     = { TH = "❌ เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง กรุณาลองใหม่ภายหลัง", EN = "❌ Server returned an invalid response, please try again later" },
+    ["AlreadyActive"]   = { TH = "⚠️ คุณมีคีย์ที่กำลังใช้งานอยู่แล้ว กรุณารอให้หมดอายุก่อน", EN = "⚠️ You already have an active key, wait until it expires" },
+    ["IntegrityError"]  = { TH = "❌ การตรวจสอบล้มเหลว (Integrity Error)", EN = "❌ Integrity check failed" },
+    ["RequestSending"]  = { TH = "⚠️ Request กำลังถูกส่ง กรุณารอ...", EN = "⚠️ Request is being sent, please wait..." },
+    ["ServerMessage"]   = { TH = "⚠️ ข้อความจากเซิร์ฟเวอร์: ", EN = "⚠️ Server message: " },
+    ["KeyInvalidLink"]  = { TH = "❌ คีย์ไม่ถูกต้อง! ลิงก์ keysystem ถูกก๊อปปี้แล้ว: ", EN = "❌ Invalid key! Keysystem link copied: " },
     ["KeyInvalidLinkShort"] = { TH = "❌ คีย์ไม่ถูกต้อง! กรุณาเปิดลิงก์ที่ถูกก๊อปปี้ไปเพื่อรับคีย์ใหม่", EN = "❌ Invalid key! Please open the copied link to get a new key" },
-    ["RedeemLinkFail"]   = { TH = "❌ Redeem ล้มเหลว และไม่สามารถสร้างลิงก์ได้", EN = "❌ Redeem failed and could not generate link" },
+    ["RedeemLinkFail"]  = { TH = "❌ Redeem ล้มเหลว และไม่สามารถสร้างลิงก์ได้", EN = "❌ Redeem failed and could not generate link" },
     ["NotificationCopied"] = { TH = "คีย์ไม่ถูกต้อง! ลิงก์ถูกก๊อปปี้ไปแล้ว", EN = "Invalid key! Link has been copied" }
 }
+
 local function T(key)
     local lang = getgenv().Language or "EN"
     return Lang[key] and (Lang[key][lang] or Lang[key]["EN"]) or key
 end
 
 -------------------------------------------------------------------------------
--- 📢 แสดงข้อความ
+-- 📢 ฟังก์ชันแสดงข้อความ + Debug
 -------------------------------------------------------------------------------
 local function onMessage(message)
     local lang = getgenv().Language or "EN"
@@ -60,48 +59,25 @@ local function onMessage(message)
     end
 end
 
--------------------------------------------------------------------------------
--- 🔧 Utility + Request Detect
--------------------------------------------------------------------------------
--- JSON/Hash mock (ใช้ HttpService แทน lib ยาว)
-local HttpService = game:GetService("HttpService")
-local lEncode = function(t) return HttpService:JSONEncode(t) end
-local lDecode = function(s) return HttpService:JSONDecode(s) end
-local lDigest = function(s) return tostring(HttpService:GenerateGUID(false)) end -- mock hash
-
--- ตรวจหา request function
-local function detectRequest()
-    if syn and syn.request then return syn.request, "syn.request" end
-    if http and http.request then return http.request, "http.request" end
-    if http_request then return http_request, "http_request" end
-    if request then return request, "request" end
-    if fluxus and fluxus.request then return fluxus.request, "fluxus.request" end
-    return nil, "nil"
-end
-local fRequest, reqSource = detectRequest()
-warn("[Platoboost Debug] fRequest source:", reqSource)
-
-if not fRequest then
-    error("[Platoboost Debug] ❌ ไม่มี request function (executor ไม่รองรับ HTTP)")
+local function debugLog(...)
+    warn("[Platoboost Debug]", ...) -- ❗ debugLog ไม่แปลภาษา
+    if getgenv().ReGuiConsole then
+        getgenv().ReGuiConsole:AppendText("[DEBUG] " .. table.concat({...}, " "))
+    end
 end
 
-local fStringChar, fToString, fStringSub, fOsTime, fMathRandom, fMathFloor, fGetHwid =
-    string.char, tostring, string.sub, os.time, math.random, math.floor,
+-------------------------------------------------------------------------------
+-- 🔧 ฟังก์ชันระบบภายใน
+-------------------------------------------------------------------------------
+local fRequest, fStringChar, fToString, fStringSub, fMathRandom, fMathFloor, fGetHwid =
+    request or http_request or syn_request,
+    string.char,
+    tostring,
+    string.sub,
+    math.random,
+    math.floor,
     gethwid or function() return game:GetService("Players").LocalPlayer.UserId end
 
--------------------------------------------------------------------------------
--- Host check
--------------------------------------------------------------------------------
-local host = "https://api.platoboost.com"
-local hostResponse = fRequest({ Url = host .. "/public/connectivity", Method = "GET" })
-if not hostResponse or (hostResponse.StatusCode ~= 200 and hostResponse.StatusCode ~= 429) then
-    host = "https://api.platoboost.net"
-end
-warn("[Platoboost Debug] Using host:", host)
-
--------------------------------------------------------------------------------
--- ฟังก์ชันสุ่ม nonce
--------------------------------------------------------------------------------
 local function generateNonce()
     local str = ""
     for _ = 1, 16 do
@@ -110,8 +86,43 @@ local function generateNonce()
     return str
 end
 
+-- ✅ Safe request wrapper
+local function safeRequest(opt)
+    local ok, res = pcall(function() return fRequest(opt) end)
+    if not ok then
+        debugLog("Request error:", res)
+        return nil, tostring(res or "unknown error")
+    end
+    if not res then
+        debugLog("No response returned")
+        return nil, "nil response"
+    end
+    return res, nil
+end
+
 -------------------------------------------------------------------------------
--- ✅ Verify Key
+-- 🌐 Multi-Host Selector
+-------------------------------------------------------------------------------
+local hosts = {
+    "https://api.platoboost.app",
+    "https://api.platoboost.com",
+    "https://api.platoboost.net"
+}
+local host = nil
+for _, h in ipairs(hosts) do
+    local res, _ = safeRequest({ Url = h .. "/public/connectivity", Method = "GET" })
+    if res and (res.StatusCode == 200 or res.StatusCode == 429) then
+        host = h
+        onMessage("✅ " .. T("ServerMessage") .. host)
+        break
+    end
+end
+if not host then
+    error("[Platoboost] ❌ No available host (app/com/net all failed)")
+end
+
+-------------------------------------------------------------------------------
+-- ✅ ฟังก์ชัน Verify Key
 -------------------------------------------------------------------------------
 local function verifyKey(key)
     if requestSending then
@@ -125,19 +136,29 @@ local function verifyKey(key)
         "?identifier=" .. lDigest(fGetHwid()) .. "&key=" .. key
     if useNonce then endpoint = endpoint .. "&nonce=" .. nonce end
 
-    local response = fRequest({ Url = endpoint, Method = "GET" })
+    local res = fRequest({ Url = endpoint, Method = "GET" })
     requestSending = false
 
-    if response and response.StatusCode == 200 then
-        local decoded = lDecode(response.Body)
+    if res and res.StatusCode == 200 then
+        local decoded = lDecode(res.Body)
         if decoded.success and decoded.data and decoded.data.valid then
-            onMessage(T("KeyValid"))
-            return true
+            if useNonce then
+                if decoded.data.hash == lDigest("true" .. "-" .. nonce .. "-" .. secret) then
+                    onMessage(T("KeyValid"))
+                    return true
+                else
+                    onMessage(T("IntegrityError"))
+                    return false
+                end
+            else
+                onMessage(T("KeyValid"))
+                return true
+            end
         else
             onMessage(T("KeyInvalid"))
             return false
         end
-    elseif response and response.StatusCode == 429 then
+    elseif res and res.StatusCode == 429 then
         onMessage(T("RateLimit"))
         return false
     else
@@ -147,7 +168,7 @@ local function verifyKey(key)
 end
 
 -------------------------------------------------------------------------------
--- 🎟️ Redeem Key
+-- 🎟️ ฟังก์ชัน Redeem Key
 -------------------------------------------------------------------------------
 local function redeemKey(key)
     local nonce = generateNonce()
@@ -155,28 +176,62 @@ local function redeemKey(key)
     local body = { identifier = lDigest(fGetHwid()), key = key }
     if useNonce then body.nonce = nonce end
 
-    local response = fRequest({
+    local res = fRequest({
         Url = endpoint,
         Method = "POST",
         Body = lEncode(body),
         Headers = { ["Content-Type"] = "application/json" }
     })
 
-    if response and response.StatusCode == 200 then
-        local decoded = lDecode(response.Body)
+    if res and res.StatusCode == 200 then
+        local decoded = lDecode(res.Body)
         if decoded.success and decoded.data and decoded.data.valid then
-            return true
+            if useNonce then
+                if decoded.data.hash == lDigest("true" .. "-" .. nonce .. "-" .. secret) then
+                    return true
+                else
+                    onMessage(T("IntegrityError"))
+                    return false
+                end
+            else
+                return true
+            end
         else
-            onMessage(T("KeyInvalid"))
-            return false
+            if fStringSub(decoded.message, 1, 27) == "unique constraint violation" then
+                onMessage(T("AlreadyActive"))
+                return false
+            else
+                onMessage(T("KeyInvalid"))
+                return false
+            end
         end
-    elseif response and response.StatusCode == 429 then
+    elseif res and res.StatusCode == 429 then
         onMessage(T("RateLimit"))
         return false
     else
         onMessage(T("ServerError"))
         return false
     end
+end
+
+-------------------------------------------------------------------------------
+-- 📎 Copy Link
+-------------------------------------------------------------------------------
+local function copyLink()
+    local res = fRequest({
+        Url = host .. "/public/start",
+        Method = "POST",
+        Body = lEncode({ service = service, identifier = lDigest(fGetHwid()) }),
+        Headers = { ["Content-Type"] = "application/json" }
+    })
+    if res and res.StatusCode == 200 then
+        local decoded = lDecode(res.Body)
+        if decoded.success and decoded.data and decoded.data.url then
+            setclipboard(decoded.data.url)
+            return decoded.data.url
+        end
+    end
+    return nil
 end
 
 -------------------------------------------------------------------------------
@@ -187,8 +242,7 @@ function api.redeemAndVerify(key)
     local redeemed = redeemKey(key)
     if redeemed then
         onMessage(T("RedeemSuccess"))
-        local verified = verifyKey(key)
-        if verified then
+        if verifyKey(key) then
             onMessage(T("KeyValidVerified"))
             if getgenv().startKeyTimer then getgenv().startKeyTimer() end
             if getgenv().OnKeyVerified then getgenv().OnKeyVerified() end
@@ -198,7 +252,23 @@ function api.redeemAndVerify(key)
             return false
         end
     else
-        onMessage(T("RedeemLinkFail"))
+        onMessage(T("RedeemFailed"))
+        local link = copyLink()
+        if link then
+            onMessage(T("KeyInvalidLink") .. link)
+            if getgenv().KeyLabel then
+                getgenv().KeyLabel.Text = T("KeyInvalidLinkShort")
+            end
+            pcall(function()
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "OcyBux Keysystem",
+                    Text = T("NotificationCopied"),
+                    Duration = 8
+                })
+            end)
+        else
+            onMessage(T("RedeemLinkFail"))
+        end
         return false
     end
 end
@@ -212,4 +282,3 @@ task.spawn(function()
 end)
 
 return api
-
