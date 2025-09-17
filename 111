@@ -192,7 +192,7 @@ ReGui:DefineTheme("Cherry", {
     TitleBarBgActive = Color3.fromRGB(50, 45, 50),
 })
 local Window = ReGui:Window({
-    Title = "OcyBux [Forsaken] Ver.KaiTan V1.0",
+    Title = "OcyBux [Forsaken] Key System",
     Theme = "Cherry",
     NoClose = true,
     NoResize = true,
