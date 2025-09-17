@@ -262,14 +262,15 @@ end)
 -- ❌ ปิดตัวเอง
 -------------------------------------------------------------------------------
 local function destroySelf()
-    pcall(function() Window:Close() end)
+    pcall(function()
+        Window:Close()
+    end)
     log("🛑 <font color='#ff5555'>หน้าต่างถูกปิดแล้ว</font>", "#ff5555")
 end
 -------------------------------------------------------------------------------
 -- 📊 Progress Animation
 -------------------------------------------------------------------------------
 local function keyPassed()
-    -- ตั้งสถานะว่า key ผ่านแล้ว
     getgenv().OcyBuxKeypass = true
     if getgenv().OnKeyVerified and typeof(getgenv().OnKeyVerified) == "function" then
         local ok, err = pcall(getgenv().OnKeyVerified)
@@ -283,7 +284,7 @@ local ProgressBar = Window:ProgressBar({
     Value = 0,
     Size = UDim2.new(1, -10, 0, 25)
 })
-local function playProgressAnimation()
+local function playProgressAnimation(onFinished)
     task.spawn(function()
         for i = 0, 100 do
             ProgressBar:SetPercentage(i)
@@ -294,6 +295,9 @@ local function playProgressAnimation()
         logSeparator()
         log("✅ กระบวนการโหลดเสร็จสิ้น 100%", "#55ff55")
         keyPassed()
+        if onFinished then
+            onFinished()
+        end
     end)
 end
 -------------------------------------------------------------------------------
@@ -392,4 +396,3 @@ RowButtons:Button({
         end
     end
 })
-
