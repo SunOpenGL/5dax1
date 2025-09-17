@@ -269,9 +269,13 @@ end
 -- 📊 Progress Animation
 -------------------------------------------------------------------------------
 local function keyPassed()
+    -- ตั้งสถานะว่า key ผ่านแล้ว
     getgenv().OcyBuxKeypass = true
     if getgenv().OnKeyVerified and typeof(getgenv().OnKeyVerified) == "function" then
-        getgenv().OnKeyVerified()
+        local ok, err = pcall(getgenv().OnKeyVerified)
+        if not ok then
+            warn("[OcyBux] Error in OnKeyVerified:", err)
+        end
     end
 end
 local ProgressBar = Window:ProgressBar({
@@ -279,7 +283,7 @@ local ProgressBar = Window:ProgressBar({
     Value = 0,
     Size = UDim2.new(1, -10, 0, 25)
 })
-local function playProgressAnimation(onFinished)
+local function playProgressAnimation()
     task.spawn(function()
         for i = 0, 100 do
             ProgressBar:SetPercentage(i)
@@ -289,7 +293,7 @@ local function playProgressAnimation(onFinished)
         ProgressBar.Label = "✅ เสร็จสิ้น 100%"
         logSeparator()
         log("✅ กระบวนการโหลดเสร็จสิ้น 100%", "#55ff55")
-        if onFinished then onFinished() end
+        keyPassed()
     end)
 end
 -------------------------------------------------------------------------------
