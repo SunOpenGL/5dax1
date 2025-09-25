@@ -114,8 +114,8 @@ local request = (syn and syn.request) or http_request or request or (fluxus and 
 function TeleportAutoExec()
     local HttpService = game:GetService("HttpService")
     local fullCode = string.format([[
-        getgenv().Language  = %q
-        getgenv().Settings  = game:GetService("HttpService"):JSONDecode(%q)
+        getgenv().Language = %q
+        getgenv().Settings = game:GetService("HttpService"):JSONDecode(%q)
         local src = game:HttpGet("https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/33xe1")
         local f, err = loadstring(src)
         if f then
@@ -124,11 +124,11 @@ function TeleportAutoExec()
             warn("[Forsaken] Load error:", err)
         end
     ]],
-        tostring(getgenv().ScriptKey or ""),
         tostring(getgenv().Language or "EN"),
         HttpService:JSONEncode(getgenv().Settings or {})
     )
     queue_on_teleport(fullCode)
+    warn("[Forsaken] TeleportAutoExec saved", getgenv().Language)
 end
 local function rejoinServer()
 	local placeId = game.PlaceId
@@ -642,7 +642,7 @@ local function walkTo(targetPos)
         if not reached then
             failCounter += 1
             LoggerForsaken.debug(T("STUCK_WAYPOINT_DEBUG", failCounter)) 
-            backOff(hrp, hum, math.random(5, 10))
+            backOff(hrp, hum, math.random(15, 30))
             return walkTo(targetPos) 
         end
     end
