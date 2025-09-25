@@ -1,1 +1,1061 @@
+local allowedPlaceIds = {
+	[18687417158] = true,
+}
+loadstring(game:HttpGet("https://raw.githubusercontent.com/SUNRTX22/beekar/refs/heads/Showpopup/Showpupup"))()
+if not allowedPlaceIds[game.PlaceId] then
+	getgenv().ShowPopup({
+		Title = "สคริปต์นี้ไม่รองรับกับแมพที่คุณเล่น :(",
+		Content = "สคริปต์นี้รองรับแค่แมพ Forsaken :(\nBy DayToDay2044",
+		Box_X = 450,
+		Box_Y = 150,
+		Delay = 5,
+		Draggable = false,
+		OnSmooth = 0.4,
+		OffSmooth = 0.5,
+		Titlepx = 22,
+		Contentpx = 19
+	})
+	return
+end
+if getgenv()._OcyBuxHUBForSaKenS0x9 then return end
+getgenv()._OcyBuxHUBForSaKenS0x9 = true
+if not game:IsLoaded() then game.Loaded:Wait() end
+if not game:IsLoaded() then repeat task.wait() until game:IsLoaded() end
+local api = loadstring(game:HttpGet("https://raw.githubusercontent.com/SUNRTX22/Rittoff_tuneNEL/refs/heads/main/KeY_sx"))()
+-----------------Start AutoFixGen-----------------
+local function Run_AutoFix()
+local InsertService = game:GetService("InsertService")
+local ReGui = loadstring(game:HttpGet('https://raw.githubusercontent.com/depthso/Dear-ReGui/refs/heads/main/ReGui.lua'))()
+local PrefabsId = "rbxassetid://" .. ReGui.PrefabsId
+ReGui:Init({
+	Prefabs = InsertService:LoadLocalAsset(PrefabsId)
+})
+ReGui:DefineTheme("Cherry", {
+    TextSize = 22,
+    TitleAlign = Enum.TextXAlignment.Center,
+    TextDisabled = Color3.fromRGB(120, 100, 120),
+    Text = Color3.fromRGB(200, 180, 200),
+    FrameBg = Color3.fromRGB(25, 20, 25),
+    FrameBgTransparency = 0.4,
+    FrameBgActive = Color3.fromRGB(120, 100, 120),
+    FrameBgTransparencyActive = 0.4,
+    CheckMark = Color3.fromRGB(150, 100, 150),
+    SliderGrab = Color3.fromRGB(150, 100, 150),
+    ButtonsBg = Color3.fromRGB(0, 255, 120),
+    CollapsingHeaderBg = Color3.fromRGB(150, 100, 150),
+    CollapsingHeaderText = Color3.fromRGB(200, 180, 200),
+    RadioButtonHoveredBg = Color3.fromRGB(150, 100, 150),
+    WindowBg = Color3.fromRGB(35, 30, 35),
+    TitleBarBg = Color3.fromRGB(35, 30, 35),
+    TitleBarBgActive = Color3.fromRGB(50, 45, 50),
+    Border = Color3.fromRGB(50, 45, 50),
+    ResizeGrab = Color3.fromRGB(255, 0, 0),
+    RegionBgTransparency = 1,
+})
+local Window = ReGui:Window({
+    Title = "OcyBux [Forsaken] Ver.KaiTan V1.2",
+    Theme = "Cherry",
+    NoClose = true,
+    NoResize = false,
+    NoMove = false,
+    NoCollapse = false,
+    Size = UDim2.fromOffset(430, 320),
+}):Center()
+local KeyLabel = Window:Label({
+    Text = (getgenv().Language == "TH" 
+        and "🔑 คีย์มีอายุ 8 ชั่วโมง" 
+        or "🔑 Key is valid for 8 hours")
+})
+getgenv().KeyLabel = KeyLabel
+local ModeLabel = Window:Label({
+    Text = ""
+})
+getgenv().ModeLabel = ModeLabel
+local function updateModeDisplay()
+    local isAiMode = getgenv().Settings.Ai_Farming
+    local lang = getgenv().Language or "EN"
+    if lang == "TH" then
+        if isAiMode then
+            getgenv().ModeLabel.Text = "<font color='rgb(0,255,120)'>[AI Mode]</font> 🤖 คุณกำลังอยู่ในโหมด AI ฟาร์ม"
+        else
+            getgenv().ModeLabel.Text = "<font color='rgb(255,100,100)'>[TP Mode]</font> ⚡ คุณกำลังอยู่ในโหมดวาร์ปฟาร์ม"
+        end
+    else
+        if isAiMode then
+            getgenv().ModeLabel.Text = "<font color='rgb(0,255,120)'>[AI Mode]</font> 🤖 You are in AI Farming Mode"
+        else
+            getgenv().ModeLabel.Text = "<font color='rgb(255,100,100)'>[TP Mode]</font> ⚡ You are in Teleport Farming Mode"
+        end
+    end
+end
+updateModeDisplay()
+local Console = Window:Console({
+    LineNumbers = true,
+    AutoScroll = true,
+    MaxLines = 500,
+    Size = UDim2.new(1, 0, 1, 0),
+    Position = UDim2.new(0, 0, 0, 0),
+    RichText = true,
+    ReadOnly = true,
+    TextWrapped = false
+})
+getgenv().ReGuiConsole = Console
+-----------------------------
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
+local CoreGui = game:GetService("CoreGui")
+local PathfindingService = game:GetService("PathfindingService")
+local cookie = getgenv().RobloxCookie or "_|WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-someone-to-log-in-as-you-and-to-steal-your-ROBUX-and-items.|_CAEaAhAB.42A7B97D6AB61D6CCC590D0DC3548E8DC71426F1EA5AF3924DE3196B9E342B09DD51B16C87028B73E72F6E417F114154211E58F0F914EB45D660A03E257B02AC490C7698F18B7FAA206CBCFBA46095CDC6303765E51B419FBD0C93888DF564A53AC8815BF72527EA1E3FB6FCC19359E04FBB7EC0E8FE72F00CEE205564DFA306717E5623FC0AC78E5AE21B8C5957FCCBF670AB26EC660D38840269A5320A22DB9ADE822BE47D040650D9683A9EAC46CD037471C7C2EB309951B030831F97C8165CAF0946A2F3CFD6628EAB3D2A704A0E02AAFD4ECF16627D5EEAF034D6FDD42DBD0B543C4659D8BBE5E24228E99495D65C0CBDCF08C1006E61A35C48048561EC8D8C6B6DBD7A1D3E5987A763B5DC9157CB4807C2DE16DD901A0A9DB19FA00C0DBEE5916849174469D91263D3C92F39C69402F0A7794E7EA959119DB5149967371614449B82BFE5312D92475B366F60A5EF541D410D357BC389B6CE3BD5F72DB410F378B4AD87516C5EA1F0C92D8F9D1EF4B4EDECF06D965028CC11E630B3BBD12AF75B263E24ABCB99FE1E23A3DC2CE7FBFF6D658B7E2A0856DF8AD954C21DC1215D3BAEAD5036369760CD7472AF17F434BE756CA4758D512300B253C5EFB5FC5616C7094F2414C51DCD1DB4085439394D190C579C233EA0FEB76D5C6A9B83ECB7726D4E75ADB3DFD6DE35E6A470F469D8A1053604CF5974D043713F4A45D1463D85EF7591D22B6790057CCA696340C102997124ADF5EC09AFB22C52B93A16E01AE5E95E49042AFD87882A25C47EC4BDD03B8DD7780F64C812C8BAE437D26670A2F5E542" -- Roblox cookie key, optional
+local HttpService = game:GetService("HttpService")
+local request = (syn and syn.request) or http_request or request or (fluxus and fluxus.request)
+-----------------------------
+function TeleportAutoExec()
+    local HttpService = game:GetService("HttpService")
+    local fullCode = string.format([[
+        getgenv().Language  = %q
+        getgenv().Settings  = game:GetService("HttpService"):JSONDecode(%q)
+        local src = game:HttpGet("https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/33xe1")
+        local f, err = loadstring(src)
+        if f then
+            f()
+        else
+            warn("[Forsaken] Load error:", err)
+        end
+    ]],
+        tostring(getgenv().ScriptKey or ""),
+        tostring(getgenv().Language or "EN"),
+        HttpService:JSONEncode(getgenv().Settings or {})
+    )
+    queue_on_teleport(fullCode)
+end
+local function rejoinServer()
+	local placeId = game.PlaceId
+		local jobId = game.JobId
+		task.spawn(function()
+			pcall(function()
+				TeleportAutoExec()
+				TeleportService:TeleportToPlaceInstance(placeId, jobId, LocalPlayer)
+			end)
+			task.wait(3)
+			TeleportAutoExec()
+			TeleportService:Teleport(placeId, LocalPlayer)
+		end)
+	end
+	CoreGui.RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+		if child.Name == "ErrorPrompt" then
+			print("⚠️ ErrorPrompt detected → Rejoining...")
+			task.wait(1)
+			rejoinServer()
+		end
+	end)
+	LocalPlayer.OnTeleport:Connect(function(state)
+		if state == Enum.TeleportState.Failed then
+			print("⚠️ Teleport Failed → retrying rejoin...")
+			task.delay(2, rejoinServer)
+		end
+	end)
+    print("✅ Key Verified → Starting AutoFixGen")
+    local Players = game:GetService("Players")
+    getgenv().DebugForsaken = true
+    local DebugMode = false
+    getgenv().LogQueue = getgenv().LogQueue or {}
+    task.spawn(function()
+        while task.wait(0.1) do
+            if getgenv().ReGuiConsole then
+                for _, v in ipairs(getgenv().LogQueue) do
+                    getgenv().ReGuiConsole:AppendText(v)
+                end
+                table.clear(getgenv().LogQueue)
+            end
+        end
+    end)
+local function displayUISettingsBanner()
+    local s = getgenv().Settings or {}
+    local lang = getgenv().Language or "EN"
+    getgenv().LogQueue = getgenv().LogQueue or {}
+    local colors = {
+        gold = "#FFD700", cyan = "#00FFFF", green = "#00FF7F", 
+        red = "#FF6B6B", blue = "#4169E1", purple = "#DA70D6", 
+        gray = "#888888", orange = "#FFA500", lightgreen = "#32CD32"
+    }
+    local texts = {
+        TH = {
+            title = "การตั้งค่าปัจจุบัน [Current Settings]",
+            lang = "ไทย (Thai)",
+            ai_on = "เปิด (AI เดิน)", ai_off = "ปิด (วาร์ป)",
+            kill = "ฆ่าตัวเองเมื่อซ่อมครบ",
+            hop = "เปลี่ยนเซิร์ฟเวอร์เมื่อซ่อมครบ",
+            invis = "ปิดล่องหนอัตโนมัติ (TP Mode)",
+            killer = "ฆ่าตัวเองเมื่อเป็นฆาตกร",
+            delay = "ดีเลย์การซ่อม",
+            status = "สถานะ: พร้อมใช้งาน"
+        },
+        EN = {
+            title = "Current Settings [การตั้งค่าปัจจุบัน]",
+            lang = "English (อังกฤษ)",
+            ai_on = "ON (AI Walk)", ai_off = "OFF (Teleport)",
+            kill = "Kill When All Done",
+            hop = "Server Hop When All Done",
+            invis = "Auto Stop Invisibility (TP Mode)",
+            killer = "Auto Kill When Killer",
+            delay = "Fix Delay",
+            status = "Status: Ready to Start"
+        }
+    }
+    local t = texts[lang] or texts.EN
+    local sep = string.rep("=", 50)
+    local logs = {
+        "<font color='" .. colors.gold .. "'>" .. sep .. "</font>",
+        "<font color='" .. colors.cyan .. "'>🔧 " .. t.title .. "</font>",
+        "<font color='" .. colors.gold .. "'>" .. sep .. "</font>",
+        "<font color='#87CEEB'>🌐 Language: <font color='" .. colors.orange .. "'>" .. t.lang .. "</font></font>",
+        "<font color='#DDA0DD'>🤖 AI Farming: <font color='" .. (s.Ai_Farming and colors.green or colors.red) .. "'>" .. 
+            (s.Ai_Farming and "ON" or "OFF") .. " [" .. (s.Ai_Farming and t.ai_on or t.ai_off) .. "]</font></font>",
+        "<font color='#F0E68C'>💀 " .. t.kill .. ": <font color='" .. 
+            (s.KillPlayer_WhenAllGeneratorsDone and "#FF4444" or colors.gray) .. "'>" .. 
+            (s.KillPlayer_WhenAllGeneratorsDone and "ON" or "OFF") .. "</font></font>",
+        "<font color='#98FB98'>🌐 " .. t.hop .. ": <font color='" .. 
+            (s.ServerHop_WhenAllGeneratorsDone and colors.blue or colors.gray) .. "'>" .. 
+            (s.ServerHop_WhenAllGeneratorsDone and "ON" or "OFF") .. "</font></font>"
+    }
+    if s.AutoturnOffInvisibility_OnlyTP ~= nil then
+        table.insert(logs, "<font color='#DEB887'>👻 " .. t.invis .. ": <font color='" .. 
+            (s.AutoturnOffInvisibility_OnlyTP and colors.purple or colors.gray) .. "'>" .. 
+            (s.AutoturnOffInvisibility_OnlyTP and "ON" or "OFF") .. "</font></font>")
+    end
+    if s.AutoKillPlayer_WhenKiller ~= nil then
+        table.insert(logs, "<font color='#CD853F'>⚰️ " .. t.killer .. ": <font color='" .. 
+            (s.AutoKillPlayer_WhenKiller and "#FF0000" or colors.gray) .. "'>" .. 
+            (s.AutoKillPlayer_WhenKiller and "ON" or "OFF") .. "</font></font>")
+    end
+    table.insert(logs, "<font color='#F4A460'>⏱️ " .. t.delay .. ": <font color='" .. colors.gold .. "'>" .. 
+        (s.FixDelay or 1.5) .. " seconds</font></font>")
+    table.insert(logs, "<font color='" .. colors.lightgreen .. "'>📊 " .. t.status .. "</font>")
+    table.insert(logs, "<font color='" .. colors.gold .. "'>" .. sep .. "</font>")
+    table.insert(logs, "")
+    for _, log in ipairs(logs) do
+        table.insert(getgenv().LogQueue, log)
+    end
+end
+displayUISettingsBanner()
+    local isAiMode = getgenv().Settings.Ai_Farming
+    local lang = getgenv().Language or "EN"
+    if lang == "TH" then
+        if isAiMode then
+            table.insert(getgenv().LogQueue, "<font color='#00ff78'>[AI Mode]</font> <font color='#55ff55'>🤖 เริ่มต้นโหมด AI ฟาร์ม</font>")
+        else
+            table.insert(getgenv().LogQueue, "<font color='#ff6464'>[TP Mode]</font> <font color='#ff5555'>⚡ เริ่มต้นโหมดวาร์ปฟาร์ม</font>")
+        end
+    else
+        if isAiMode then
+            table.insert(getgenv().LogQueue, "<font color='#00ff78'>[AI Mode]</font> <font color='#55ff55'>🤖 Starting AI Farming Mode</font>")
+        else
+            table.insert(getgenv().LogQueue, "<font color='#ff6464'>[TP Mode]</font> <font color='#ff5555'>⚡ Starting Teleport Farming Mode</font>")
+        end
+    end
+    -- Language System
+local LangMap = {
+    TH = {
+        START_FIX = "🔧 เริ่มซ่อมเครื่องปั่นไฟ: %s ที่ตำแหน่ง %s",
+        DONE_FIX  = "✅ ซ่อมเครื่องปั่นไฟเสร็จแล้ว: %s",
+        ALL_DONE  = "⚡ เครื่องปั่นไฟทุกเครื่องซ่อมเสร็จหมดแล้ว",
+        KILL      = "💀 กำลังฆ่าตัวละครตามการตั้งค่า",
+        HOP       = "🌐 กำลังเปลี่ยนเซิร์ฟเวอร์ใหม่",
+        STATE_SURVIVOR = "🟢 คุณเป็นผู้รอดชีวิต → เริ่มระบบซ่อมอัตโนมัติ",
+        STATE_SPECTATE = "👀 คุณกำลังดูเกม → รอเกมใหม่",
+        STATE_KILLER   = "🔪 คุณเป็นฆาตกร → โจมตีตรงๆ",
+        STATE_UNKNOWN  = "❓ ไม่ทราบทีมของคุณ: %s",
+        MAP_LOADED     = "🗺️ โหลดแผนที่เสร็จแล้ว: %s",
+        NO_GEN         = "⚠️ ไม่มีเครื่องปั่นไฟให้ซ่อม",
+        AI_WALKING     = "🤖 AI กำลังเดินไปซ่อม: %s",
+        PATH_FAILED    = "❌ หาเส้นทางไป %s ไม่ได้ → ลองตำแหน่งถัดไป",
+        STUCK_WAYPOINT = "⚠️ ติดอยู่ระหว่างทาง → ถอยหลังแล้วลองใหม่",
+        CANNOT_REACH   = "⚠️ ไปไม่ถึง → ถอยหลังแล้วลองใหม่",
+        TELEPORT_MODE  = "⚡ วาร์ปไปที่: %s",
+        CANNOT_ENTER   = "⚠️ เข้าซ่อมที่ %s ไม่ได้ → ลองตำแหน่งถัดไป",
+        GEN_FAILED     = "⚠️ เครื่องนี้ซ่อมไม่ได้ → ไปหาเครื่องใหม่",
+        SYSTEM_RESET   = "🔄 รีเซ็ตระบบทั้งหมด - พร้อมเกมใหม่",
+        LOOP_STARTING  = "🔄 กำลังเริ่มระบบซ่อมอัตโนมัติ...",
+        LOOP_STOPPED   = "🛑 หยุดระบบซ่อมอัตโนมัติแล้ว",
+        SYSTEM_LOADED  = "✅ โหลดระบบซ่อมอัตโนมัติเสร็จแล้ว!",
+        DIED_MESSAGE   = "💀 ตัวละครตาย - กลับไปดูเกมแล้ว...",
+        NO_CHARACTER   = "⚠️ ไม่มีตัวละคร - กำลังรอ...",
+        CHAR_SPAWNED   = "🔄 ตัวละครเกิดใหม่",
+        GAME_READY     = "🎮 เกมพร้อมแล้ว - กำลังตรวจสอบทีม...",
+        INITIAL_START  = "🚀 เริ่มต้นครั้งแรก",
+        AUTO_RESTART   = "🔧 เริ่มใหม่อัตโนมัติ: เจอผู้รอดชีวิตแต่ระบบไม่ทำงาน",
+        NEW_MAP_DETECT = "🗺️ เจอแผนที่ใหม่ - กำลังรีเซ็ต...",
+        PATH_RETRY_JUMP = "❌ หาเส้นทางล้มเหลว (%d ครั้ง)",
+        WALK_SUCCESS    = "✅ เดินไปถึงเป้าหมายสำเร็จ",
+        TELEPORT_SUCCESS = "⚡ วาร์ปสำเร็จ",
+        ALL_COMPLETE_FANCY = "🌈✨ ซ่อมเครื่องปั่นไฟครบทุกเครื่องแล้ว! 🎉✨",
+        INVISIBILITY_AUTO = "🔧 เริ่มล่องหนอัตโนมัติ (ตรวจพบขาดหาย)",
+        PATH_FAILED_DEBUG = "❌ หาเส้นทางไม่ได้ (%d ครั้ง)",
+        STUCK_WAYPOINT_DEBUG = "⚠️ ติดที่จุดเดิน (%d ครั้ง)",
+        AUTO_STOP_INVIS = "🛑 หยุดล่องหนอัตโนมัติ (ซ่อมเครื่องปั่นไฟครบแล้ว)",
+    },
+    EN = {
+        START_FIX = "🔧 Started repairing generator: %s at position %s",
+        DONE_FIX  = "✅ Generator repair completed: %s",
+        ALL_DONE  = "⚡ All generators have been repaired",
+        KILL      = "💀 Eliminating character as configured",
+        HOP       = "🌐 Switching to new server",
+        STATE_SURVIVOR = "🟢 You are a Survivor → Starting auto-repair system",
+        STATE_SPECTATE = "👀 You are spectating → Waiting for new game",
+        STATE_KILLER   = "🔪 You are the Killer → Direct attack mode",
+        STATE_UNKNOWN  = "❓ Unknown team status: %s",
+        MAP_LOADED     = "🗺️ Map loaded successfully: %s",
+        NO_GEN         = "⚠️ No generators available to repair",
+        AI_WALKING     = "🤖 AI walking to repair: %s",
+        PATH_FAILED    = "❌ Cannot find path to %s → trying next position",
+        STUCK_WAYPOINT = "⚠️ Stuck along the way → backing off and retrying",
+        CANNOT_REACH   = "⚠️ Cannot reach destination → backing off and retrying",
+        TELEPORT_MODE  = "⚡ Teleporting to: %s",
+        CANNOT_ENTER   = "⚠️ Cannot enter repair at %s → trying next position",
+        GEN_FAILED     = "⚠️ This generator cannot be repaired → finding new one",
+        SYSTEM_RESET   = "🔄 System reset complete - Ready for new game",
+        LOOP_STARTING  = "🔄 Starting auto-repair system...",
+        LOOP_STOPPED   = "🛑 Auto-repair system stopped",
+        SYSTEM_LOADED  = "✅ Auto-repair system loaded successfully!",
+        DIED_MESSAGE   = "💀 Character died - Back to spectating...",
+        NO_CHARACTER   = "⚠️ No character found - waiting...",
+        CHAR_SPAWNED   = "🔄 Character respawned",
+        GAME_READY     = "🎮 Game ready - Checking team status...",
+        INITIAL_START  = "🚀 Initial startup",
+        AUTO_RESTART   = "🔧 Auto-restart: Found survivor but system not running",
+        NEW_MAP_DETECT = "🗺️ New map detected - Resetting system...",
+        PATH_RETRY_JUMP = "❌ Pathfinding failed (%d attempts)",
+        WALK_SUCCESS    = "✅ Successfully reached target",
+        TELEPORT_SUCCESS = "⚡ Teleport successful",
+        ALL_COMPLETE_FANCY = "🌈✨ All generators successfully repaired! 🎉✨",
+        INVISIBILITY_AUTO = "🔧 Auto-invisibility activated (missing detection)",
+        PATH_FAILED_DEBUG = "❌ Path failed (%d attempts)",
+        STUCK_WAYPOINT_DEBUG = "⚠️ Stuck at waypoint (%d attempts)",
+        AUTO_STOP_INVIS = "🛑 Auto-invisibility deactivated (all generators repaired)",
+    }
+}
+    local function T(key, ...)
+        local lang = (getgenv().Language == "TH") and "TH" or "EN"
+        local template = LangMap[lang][key] or key
+        return string.format(template, ...)
+    end
+    local LoggerForsaken = {}
+    function LoggerForsaken.debug(msg)
+        local isAiMode = getgenv().Settings.Ai_Farming
+        local modePrefix
+        if isAiMode then
+            modePrefix = "<font color='#00ff78'>[AI Mode]</font> "
+        else
+            modePrefix = "<font color='#ff6464'>[TP Mode]</font> "
+        end
+        table.insert(getgenv().LogQueue, modePrefix .. msg .. "")
+    end
+    local Network = require(ReplicatedStorage.Modules.Network)
+    local Survivors = workspace.Players:WaitForChild("Survivors")
+    local INVIS_ANIM2 = "75804462760596"
+    local crawlAnimTrack
+	--Api Serverhop by DayToDay2044 (รักษาไว้ตามต้นฉบับ)
+local DebugMode = false
+local function setDebug(state: boolean)
+    DebugMode = state
+end
+local Logger = {}
+function Logger.debug(...)
+    if DebugMode then
+        warn("[DEBUG]", ...)
+    end
+end
 
+if not request then
+    Logger.debug("ไม่มี request function รองรับ")
+    return
+end
+local folder = "ServerLogs"
+if not isfolder(folder) then makefolder(folder) end
+local cacheFile = string.format("%s/JobIds_%d.json", folder, game.PlaceId)
+local visitedFile = string.format("%s/Visited_%d.json", folder, game.PlaceId)
+local function LoadJson(path)
+    if not isfile(path) then return {} end
+    local ok, data = pcall(function()
+        return HttpService:JSONDecode(readfile(path))
+    end)
+    return ok and data or {}
+end
+local function SaveJson(path, data)
+    local ok, err = pcall(function()
+        writefile(path, HttpService:JSONEncode(data))
+    end)
+    if not ok then Logger.debug("SaveJson error:", err) end
+end
+local function Rejoin()
+    Logger.debug("Random Rejoin เพราะ cache/โหลดเซิร์ฟล้มเหลวหรือหมดหน้าแล้ว")
+	TeleportAutoExec()
+    TeleportService:Teleport(game.PlaceId, LocalPlayer)
+end
+local function GetServers(cursor)
+    local url = ("https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100%s")
+        :format(game.PlaceId, cursor and ("&cursor=" .. cursor) or "")
+    local response = request({
+        Url = url,
+        Method = "GET",
+        Headers = {
+            ["User-Agent"] = "Roblox/WinInet",
+            ["Accept"] = "application/json",
+            ["Referer"] = "https://www.roblox.com/games/" .. game.PlaceId,
+            ["Origin"] = "https://www.roblox.com",
+			["Cookie"] = ".ROBLOSECURITY=" .. cookie
+        }
+    })
+    if not response then
+        Logger.debug("GetServers ล้มเหลว: ไม่มี response")
+        return nil
+    end
+    if response.StatusCode == 429 then
+        Logger.debug("เจอ 429 → Rejoin")
+        Rejoin()
+        return nil
+    end
+    if response.StatusCode ~= 200 or not response.Body then
+        Logger.debug("GetServers ล้มเหลว | Status:", response.StatusCode)
+        Rejoin()
+        return nil
+    end
+    local ok, data = pcall(function()
+        return HttpService:JSONDecode(response.Body)
+    end)
+    return ok and data or nil
+end
+local function CacheJobIds(cursor)
+    local servers = GetServers(cursor)
+    if not servers or not servers.data or #servers.data == 0 then
+        Rejoin()
+        return false
+    end
+    local jobs = {}
+    for _, server in ipairs(servers.data) do
+        if server.id then table.insert(jobs, server.id) end
+    end
+    local cache = {
+        jobs = jobs,
+        nextCursor = servers.nextPageCursor
+    }
+    SaveJson(cacheFile, cache)
+    Logger.debug(("โหลด %d เซิร์ฟ ลงไฟล์ | nextCursor=%s"):format(#jobs, tostring(servers.nextPageCursor)))
+    return true
+end
+local function TeleportFromCache()
+    local cache = LoadJson(cacheFile)
+    local visited = LoadJson(visitedFile)
+    local jobs = cache.jobs or {}
+    if not jobs or #jobs == 0 then
+        Logger.debug("ยังไม่มี cache → โหลดหน้าแรก")
+        if not CacheJobIds(nil) then return end
+        cache = LoadJson(cacheFile)
+        jobs = cache.jobs or {}
+    end
+    local filtered = {}
+    for _, id in ipairs(jobs) do
+        if id ~= game.JobId and not table.find(visited, id) then
+            table.insert(filtered, id)
+        end
+    end
+    if #filtered == 0 then
+        if cache.nextCursor then
+            Logger.debug("Cache หมด → โหลดหน้าถัดไปด้วย nextCursor")
+            if not CacheJobIds(cache.nextCursor) then return end
+            cache = LoadJson(cacheFile)
+            jobs = cache.jobs or {}
+            for _, id in ipairs(jobs) do
+                if id ~= game.JobId and not table.find(visited, id) then
+                    table.insert(filtered, id)
+                end
+            end
+        else
+            Logger.debug("ไม่มี nextCursor แล้ว → Rejoin")
+            Rejoin()
+            return
+        end
+    end
+    if #filtered == 0 then
+        Logger.debug("ไม่มีเซิร์ฟเวอร์ใหม่ → Rejoin")
+        Rejoin()
+        return
+    end
+    local jobId = filtered[math.random(1, #filtered)]
+    table.insert(visited, jobId)
+    SaveJson(visitedFile, visited)
+    Logger.debug("วาร์ปไป JobId:", jobId)
+	TeleportAutoExec()
+    TeleportService:TeleportToPlaceInstance(game.PlaceId, jobId, LocalPlayer)
+end
+setDebug(false) -- Function to enable/disable debug.warn()
+
+
+local PathfindingService = game:GetService("PathfindingService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
+local CoreGui = game:GetService("CoreGui")
+
+local Network = require(ReplicatedStorage.Modules.Network)
+local Survivors = workspace.Players:WaitForChild("Survivors")
+
+-- Animation IDs
+local INVIS_ANIM2 = "75804462760596"
+local FIX_ANIM_ID = "rbxassetid://82691533602949"
+
+-- Global Variables
+local gameStarted = false
+local finishedAll = false 
+local currentFixing = nil
+local loopRunning = false
+local crawlAnimTrack = nil
+local fixAnimTrack = nil
+
+-- Sprint Module
+local sprintModule = require(game.ReplicatedStorage.Systems.Character.Game.Sprinting)
+local function enableInfiniteSprint()
+    if not sprintModule then return end
+    sprintModule.StaminaLossDisabled = true
+    sprintModule.CanSprint = true
+    sprintModule.Stamina = sprintModule.MaxStamina
+    sprintModule.IsSprinting = true
+    if sprintModule.__sprintedEvent then
+        sprintModule.__sprintedEvent:Fire(true, false)
+    end
+end
+
+-- Helper Functions
+local function getCharacterSize()
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local hum = char:WaitForChild("Humanoid")
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    local cf, size = char:GetBoundingBox()
+    local agentRadius = math.max(size.X, size.Z) / 2
+    local agentHeight = size.Y
+    return agentRadius, agentHeight
+end
+
+local function backOff(hrp, hum, dist)
+    dist = dist or 5
+    if hrp and hum then
+        local backPos = hrp.Position - (hrp.CFrame.LookVector * dist)
+        hum:MoveTo(backPos)
+        task.wait(0.3) 
+    end
+end
+
+local function playInvisAnim()
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local hum = char:WaitForChild("Humanoid")
+    if hum then
+        local anim = Instance.new("Animation")
+        anim.AnimationId = "rbxassetid://"..INVIS_ANIM2
+        local track = hum:LoadAnimation(anim)
+        track.Priority = Enum.AnimationPriority.Action4
+        track:Play()
+        track:AdjustSpeed(0)
+        track:AdjustWeight(1)
+        crawlAnimTrack = track
+    end
+end
+local function playFixAnim(hum)
+    if fixAnimTrack then
+        fixAnimTrack:Stop()
+        fixAnimTrack:Destroy()
+        fixAnimTrack = nil
+    end
+    if hum then
+        local anim = Instance.new("Animation")
+        anim.AnimationId = FIX_ANIM_ID
+        fixAnimTrack = hum:LoadAnimation(anim)
+        fixAnimTrack.Priority = Enum.AnimationPriority.Action
+        fixAnimTrack:Play()
+    end
+end
+local function stopFixAnim()
+    if fixAnimTrack then
+        fixAnimTrack:Stop()
+        fixAnimTrack:Destroy()
+        fixAnimTrack = nil
+    end
+end
+local function stopInvisAnim()
+    if crawlAnimTrack then
+        crawlAnimTrack:Stop()
+        crawlAnimTrack:Destroy()
+        crawlAnimTrack = nil
+    end
+end
+local failCounter = 0
+local JUMP_THRESHOLD = 5 
+local function computePath(hrpPos, targetPos, allowJump)
+    local agentRadius, agentHeight = getCharacterSize()
+    local path = PathfindingService:CreatePath({
+        AgentRadius = agentRadius,
+        AgentHeight = agentHeight,
+        AgentCanJump = allowJump,
+        AgentJumpHeight = allowJump and 5 or 0,
+        AgentMaxSlope = 80,
+        WaypointSpacing = 8,
+    })
+    local ok = pcall(function()
+        path:ComputeAsync(hrpPos, targetPos)
+    end)
+    if ok and path.Status == Enum.PathStatus.Success then
+        return path
+    end
+    return nil
+end
+
+local function walkTo(targetPos)
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not (hum and hrp and hum.Health > 0) then return false end
+    enableInfiniteSprint()
+    local useJump = (failCounter >= JUMP_THRESHOLD) 
+    local path = computePath(hrp.Position, targetPos, useJump)
+    if not path then
+        failCounter += 1
+        LoggerForsaken.debug(T("PATH_FAILED_DEBUG", failCounter)) 
+        return false
+    else
+        failCounter = 0 
+    end
+    for _, wp in ipairs(path:GetWaypoints()) do
+        if not (hum and hrp and hum.Health > 0) then return false end
+        hum:MoveTo(wp.Position)
+        local reached, finished = false, false
+        local conn = hum.MoveToFinished:Connect(function(success)
+            finished = true
+            reached = success
+        end)
+        local startTime = os.clock()
+        while not finished and os.clock() - startTime < 0.7 do
+            task.wait()
+        end
+        conn:Disconnect()
+        if not reached then
+            failCounter += 1
+            LoggerForsaken.debug(T("STUCK_WAYPOINT_DEBUG", failCounter)) 
+            backOff(hrp, hum, math.random(5, 10))
+            return walkTo(targetPos) 
+        end
+    end
+    return true
+end
+local function getAllPositions(gen, hrp)
+    local posFolder = gen:FindFirstChild("Positions")
+    if not (posFolder and hrp) then return {} end
+    local result = {}
+    for _, p in ipairs(posFolder:GetChildren()) do
+        if p:IsA("BasePart") then
+            table.insert(result, {part = p, name = p.Name, dist = (hrp.Position - p.Position).Magnitude})
+        end
+    end
+    table.sort(result, function(a,b) return a.dist < b.dist end)
+    return result
+end
+local function getNearestGenerator()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+    local ok, mapFolder = pcall(function()
+        return workspace.Map.Ingame:FindFirstChild("Map")
+    end)
+    if not ok or not mapFolder then return nil end
+    local nearest, shortest = nil, math.huge
+    for _, gen in ipairs(mapFolder:GetChildren()) do
+        if gen:IsA("Model") and gen.Name == "Generator" then
+            local prog = gen:FindFirstChild("Progress")
+            if prog and prog.Value < 100 then
+                local positions = getAllPositions(gen, hrp)
+                if #positions > 0 then
+                    local dist = positions[1].dist
+                    if dist < shortest then
+                        shortest, nearest = dist, gen
+                    end
+                end
+            end
+        end
+    end
+    return nearest
+end
+local function teleportTo(posPart)
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if hrp and posPart then
+        hrp.CFrame = CFrame.new(posPart.Position)
+        LoggerForsaken.debug(T("TELEPORT_MODE", posPart.Name))
+    end
+end
+local function isSurvivor()
+    local char = LocalPlayer.Character
+    if not char then return false end
+    return char.Parent == workspace.Players.Survivors
+end
+local function allGeneratorsDone()
+    if not gameStarted then return false end
+    if not isSurvivor() then return false end
+    local ok, mapFolder = pcall(function()
+        return workspace.Map.Ingame:FindFirstChild("Map")
+    end)
+    if not ok or not mapFolder then return false end
+    for _, gen in ipairs(mapFolder:GetChildren()) do
+        if gen:IsA("Model") and gen.Name == "Generator" then
+            local prog = gen:FindFirstChild("Progress")
+            if prog and prog.Value < 100 then
+                return false
+            end
+        end
+    end
+    return true
+end
+local function resetAll()
+    loopRunning = false
+    finishedAll = false
+    currentFixing = nil
+    gameStarted = false
+    stopFixAnim()
+    stopInvisAnim()
+    LoggerForsaken.debug(T("SYSTEM_RESET"))
+end
+local function stopAutoFixLoop() 
+    loopRunning = false 
+end
+local function tryFixGen(gen)
+    if finishedAll or not gen or not gen.Parent then 
+        return false 
+    end
+    if currentFixing == gen then 
+        return false 
+    end
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    if not (hrp and hum and char.Parent and hum.Health > 0) then 
+        return false 
+    end
+    local positions = getAllPositions(gen, hrp)
+    local rem = gen:FindFirstChild("Remotes")
+    local RF = rem and rem:FindFirstChild("RF")
+    local RE = rem and rem:FindFirstChild("RE")
+    local progress = gen:FindFirstChild("Progress")
+    if not (RF and RE and progress) then 
+        return false 
+    end
+    if progress.Value >= 100 then
+        return false
+    end
+    for attemptIndex, entry in ipairs(positions) do
+        if not (hrp and hum and hum.Health > 0) then
+            return false
+        end
+        if getgenv().Settings.Ai_Farming then
+            LoggerForsaken.debug(T("AI_WALKING", entry.part.Name))
+            local walkSuccess = walkTo(entry.part.Position)
+            if not walkSuccess then
+                LoggerForsaken.debug(T("PATH_FAILED", entry.part.Name))
+                backOff(hrp, hum, math.random(5, 10))
+                if attemptIndex >= 3 then
+                    return false
+                end
+                continue
+            end
+        else
+            teleportTo(entry.part)
+        end
+        task.wait(0.3)
+        local enterSuccess, enterResult = pcall(function() 
+            return RF:InvokeServer("enter") 
+        end)
+        if enterSuccess and enterResult == "fixing" then
+            currentFixing = gen
+            LoggerForsaken.debug(T("START_FIX", gen.Name, entry.part.Name))
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then
+                playFixAnim(hum)
+            end
+            local fixLoopRunning = true
+            local lastProgress = progress.Value
+            local lastProgressTime = os.clock()
+            local fixTask = task.spawn(function()
+                while fixLoopRunning and gen.Parent and progress.Value < 100 do
+                    if not (char and char.Parent and hum and hum.Health > 0) then
+                        fixLoopRunning = false
+                        break
+                    end
+                    local fireSuccess, fireError = pcall(function()
+                        RE:FireServer("finishedPuzzle")
+                    end)
+                    if not fireSuccess then
+                        fixLoopRunning = false
+                        break
+                    end
+                    task.wait(getgenv().Settings.FixDelay or 1.5)
+                    if progress.Value > lastProgress then
+                        lastProgress = progress.Value
+                        lastProgressTime = os.clock()
+                    elseif (os.clock() - lastProgressTime) > 3 then
+                        fixLoopRunning = false
+                        break
+                    end
+                end
+            end)
+            while fixLoopRunning and progress.Value < 100 and currentFixing == gen do
+                task.wait(0.1)
+                if not (char and char.Parent and hum and hum.Health > 0) then
+                    fixLoopRunning = false
+                    break
+                end
+            end
+            fixLoopRunning = false
+            if fixTask then
+                task.cancel(fixTask)
+            end
+            stopFixAnim()
+            currentFixing = nil
+            if progress.Value >= 100 then
+                LoggerForsaken.debug(T("DONE_FIX", gen.Name))
+                return true
+            else
+                task.wait(1)
+                return tryFixGen(gen)
+            end
+        else
+            LoggerForsaken.debug(T("CANNOT_ENTER", entry.part.Name))
+        end
+    end
+    LoggerForsaken.debug(T("GEN_FAILED"))
+    return false
+end
+local function startAutoFixLoop()
+    stopAutoFixLoop()
+    loopRunning = true
+    task.spawn(function()
+        LoggerForsaken.debug(T("LOOP_STARTING"))
+        while loopRunning do
+            if not isSurvivor() then
+                break
+            end
+            local char = LocalPlayer.Character
+            local hum = char and char:FindFirstChildOfClass("Humanoid")
+            if not (char and hum and hum.Health > 0) then
+                task.wait(2)
+                continue
+            end
+            local gen = getNearestGenerator()
+            if gen then
+                local success = pcall(tryFixGen, gen)
+                if not success then
+                    task.wait(2)
+                end
+            else
+                if allGeneratorsDone() and not finishedAll then
+                    finishedAll = true
+                    local msg = T("ALL_COMPLETE_FANCY")
+                    table.insert(getgenv().LogQueue, "<font color='#ff66ff'>" .. msg .. "</font>") 
+                    if getgenv().Settings.AutoturnOffInvisibility_OnlyTP 
+                    and not getgenv().Settings.Ai_Farming then
+                        LoggerForsaken.debug(T("AUTO_STOP_INVIS"))
+                        stopInvisAnim()
+                    end
+                    if getgenv().Settings.KillPlayer_WhenAllGeneratorsDone then
+                        LoggerForsaken.debug(T("KILL"))
+                        if hum then hum.Health = 0 end
+                    elseif getgenv().Settings.ServerHop_WhenAllGeneratorsDone then
+                        LoggerForsaken.debug(T("HOP"))
+                        task.wait(2)
+                        TeleportFromCache()
+                    end
+                    break
+                else
+                    LoggerForsaken.debug(T("NO_GEN"))
+                    task.wait(3)
+                end
+            end
+            task.wait(0.5)
+        end
+        LoggerForsaken.debug(T("LOOP_STOPPED"))
+    end)
+end
+local function checkTeam()
+    local char = LocalPlayer.Character
+    if not char or not char.Parent then
+        LoggerForsaken.debug(T("NO_CHARACTER"))
+        return
+    end
+    local parent = char.Parent
+    if parent == workspace.Players.Spectating then
+        LoggerForsaken.debug(T("STATE_SPECTATE"))
+        stopAutoFixLoop()
+    elseif parent == workspace.Players.Survivors then
+        LoggerForsaken.debug(T("STATE_SURVIVOR"))
+        currentFixing = nil
+        finishedAll = false
+        if not getgenv().Settings.Ai_Farming then
+            playInvisAnim()
+        end
+        startAutoFixLoop()
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            hum.Died:Connect(
+                function()
+                    LoggerForsaken.debug(T("DIED_MESSAGE"))
+                    resetAll()
+                end
+            )
+        end
+    elseif parent == workspace.Players.Killers then
+        LoggerForsaken.debug(T("STATE_KILLER"))
+        stopAutoFixLoop()
+        if getgenv().Settings.AutoKillPlayer_WhenKiller then
+            if char and char.Parent == workspace.Players.Killers then
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if hum then
+                    LoggerForsaken.debug(T("AUTO_KILL_SELF"))
+                    task.spawn(
+                        function()
+                            repeat
+                                hum.Health = 0
+                                task.wait(0.2)
+                            until hum.Health <= 0
+                        end
+                    )
+                end
+            end
+        end
+    else
+        LoggerForsaken.debug(T("STATE_UNKNOWN", parent.Name))
+        stopAutoFixLoop()
+    end
+end
+getgenv().KillerWallSystem = getgenv().KillerWallSystem or {
+    watcher = nil,
+    active = false
+}
+local function replaceIfKillerWall(obj)
+    if (obj:IsA("BasePart") or obj:IsA("UnionOperation") or obj:IsA("MeshPart"))
+        and obj.CollisionGroup == "Killers"
+        and not string.find(obj.Name, "FakeBlocker_") then
+        local fake = Instance.new("Part")
+        fake.Size = obj.Size
+        fake.CFrame = obj.CFrame
+        fake.Anchored = true
+        fake.CanCollide = true
+        fake.Name = "FakeBlocker_" .. obj.Name
+        fake.Color = obj.Color
+        fake.Material = obj.Material
+        fake.Transparency = obj.Transparency
+        fake.Reflectance = obj.Reflectance
+        fake.CastShadow = obj.CastShadow
+        fake.Parent = obj.Parent
+        obj:Destroy()
+    end
+end
+local function processMap(realMap)
+    for _, obj in ipairs(realMap:GetDescendants()) do
+        replaceIfKillerWall(obj)
+    end
+    realMap.DescendantAdded:Connect(function(obj)
+        replaceIfKillerWall(obj)
+    end)
+end
+local function autoReplaceKillerWalls()
+    if getgenv().KillerWallSystem.active then
+        return 
+    end
+    getgenv().KillerWallSystem.active = true
+    local ingame = workspace:WaitForChild("Map"):WaitForChild("Ingame")
+    getgenv().KillerWallSystem.watcher = ingame.ChildAdded:Connect(function(child)
+        if child.Name == "Map" then
+            processMap(child)
+        end
+    end)
+    local realMap = ingame:FindFirstChild("Map")
+    if realMap then
+        processMap(realMap)
+    end
+end
+Network:SetConnection("ReplicateMapCreation", "REMOTE_EVENT", function(config)
+    LoggerForsaken.debug(T("NEW_MAP_DETECT"))
+    resetAll()
+    local ok, data = pcall(require, config)
+    local mapName = ok and data.DisplayName or config.Name
+    LoggerForsaken.debug(T("MAP_LOADED", mapName))
+    task.spawn(function()
+        task.wait(5)
+        gameStarted = true
+        LoggerForsaken.debug(T("GAME_READY"))
+        autoReplaceKillerWalls()
+        checkTeam()
+    end)
+end)
+LocalPlayer.CharacterAdded:Connect(function(char)
+    LoggerForsaken.debug(T("CHAR_SPAWNED"))
+    task.spawn(function()
+        local hrp = char:WaitForChild("HumanoidRootPart", 5)
+        if hrp then
+            task.wait(1)
+            if gameStarted then
+                checkTeam()
+            end
+        end
+    end)
+end)
+task.spawn(function()
+    while true do
+        task.wait(5)
+        local char = LocalPlayer.Character
+        if gameStarted and char and char.Parent == workspace.Players.Survivors and not loopRunning then
+            LoggerForsaken.debug(T("AUTO_RESTART"))
+            checkTeam()
+        end
+    end
+end)
+task.spawn(function()
+    task.wait(3)
+    if not gameStarted then
+        LoggerForsaken.debug(T("INITIAL_START"))
+        gameStarted = true
+        checkTeam()
+    end
+end)
+    local function isDev(plr)
+        if game.CreatorType == Enum.CreatorType.User then
+            return plr.UserId == game.CreatorId
+        end
+        if game.CreatorType == Enum.CreatorType.Group then
+            local ok, rank = pcall(function()
+                return plr:GetRankInGroup(game.CreatorId)
+            end)
+            if ok then
+                return rank > 1
+            end
+        end
+        return false
+    end
+    if getgenv().Settings and getgenv().Settings.AutoCheck_Admin then
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if isDev(plr) then
+                warn("⚠️ พบ Dev/Admin ตั้งแต่เริ่ม:", plr.Name)
+                Players.LocalPlayer:Kick("พบ Dev/Admin ในเซิร์ฟเวอร์")
+                TeleportFromCache()
+                return
+            end
+        end
+        Players.PlayerAdded:Connect(function(plr)
+            if isDev(plr) then
+                warn("⚠️ พบ Dev/Admin:", plr.Name, "เตะตัวเองออกทันที")
+                Players.LocalPlayer:Kick("พบ Dev/Admin ในเซิร์ฟเวอร์")
+                TeleportFromCache()
+            end
+        end)
+    end
+LoggerForsaken.debug(T("SYSTEM_LOADED"))
+end
+getgenv().OnKeyVerified = Run_AutoFix
