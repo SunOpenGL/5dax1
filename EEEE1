@@ -1,3 +1,9 @@
+if type(getgenv().Day2044) ~= "table" then
+    getgenv().Day2044 = { _ShowPrice = true }
+end
+
+local settings = getgenv().Day2044
+
 local settingsMeta = {
     __index = function(t, k)
         if k == "ShowPrice" then
@@ -19,8 +25,11 @@ local settingsMeta = {
         end
     end
 }
-setmetatable(settings, settingsMeta)
-getgenv().Day2044 = settings
+
+-- เซ็ต metatable แค่ครั้งเดียว
+if not getmetatable(settings) then
+    setmetatable(settings, settingsMeta)
+end
 local ReplicatedStorage, Players = game:GetService("ReplicatedStorage"), game:GetService("Players")
 local LocalPlayer, Backpack, PlayerGui = Players.LocalPlayer, Players.LocalPlayer.Backpack, Players.LocalPlayer:WaitForChild("PlayerGui")
 local Modules = {
