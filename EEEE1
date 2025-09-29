@@ -1,0 +1,208 @@
+local settingsMeta = {
+    __index = function(t, k)
+        if k == "ShowPrice" then
+            return rawget(t, "_ShowPrice")
+        end
+        return rawget(t, k)
+    end,
+    __newindex = function(t, k, v)
+        if k == "ShowPrice" then
+            local oldValue = rawget(t, "_ShowPrice")
+            rawset(t, "_ShowPrice", v)
+            if oldValue ~= v then
+                if refreshAllOverlays then
+                    refreshAllOverlays()
+                end
+            end
+        else
+            rawset(t, k, v)
+        end
+    end
+}
+setmetatable(settings, settingsMeta)
+getgenv().Day2044 = settings
+local ReplicatedStorage, Players = game:GetService("ReplicatedStorage"), game:GetService("Players")
+local LocalPlayer, Backpack, PlayerGui = Players.LocalPlayer, Players.LocalPlayer.Backpack, Players.LocalPlayer:WaitForChild("PlayerGui")
+local Modules = {
+    PlantMutations   = require(ReplicatedStorage.Modules.Utility.Parent.Library.PlantMutations),
+    BrainrotMutations= require(ReplicatedStorage.Modules.Utility.Parent.Library.BrainrotMutations),
+    BossParams       = require(ReplicatedStorage.Modules.Utility.Parent.Library.BossParams),
+    Util             = require(ReplicatedStorage.Modules.Utility.Util),
+}
+local function normalizeName(name) return name:gsub("%[.-%]%s*", "") end
+local function calculatePlantPrice(tool)
+    local info = Modules.Util:GetMutationInfoFromMutations(tool:GetAttributes())
+    return math.round((tool:GetAttribute("Price") or 0) * math.max(info.valueMultiplier or 1, 1))
+end
+local function calculateBrainrotWorth(tool)
+    local asset = ReplicatedStorage.Assets.Brainrots:FindFirstChild(normalizeName(tool.Name))
+    if not asset then return 0 end
+    local worth = (asset:GetAttribute("Health") or 0) / 4
+    if tool:GetAttribute("Boss") then
+        worth = math.floor(worth * require(ReplicatedStorage.ServerScriptService.Bosses["Bosses [Server]"]):FetchMultipliers().Worth)
+    end
+    for attr, val in pairs(tool:GetAttributes()) do
+        local mut = Modules.BrainrotMutations[attr] and Modules.BrainrotMutations[attr][val]
+        if mut and mut.Boost then worth = math.floor(worth * mut.Boost) end
+    end
+    return math.floor(worth * math.max((tool:GetAttribute("Size") or 1) / 1.25, 1))
+end
+local buttonToTool, toolToButton = {}, {}
+local function getOrCreateOverlay(button)
+    local overlay = button:FindFirstChild("PriceOverlay")
+    if overlay then
+        return overlay
+    end
+    overlay = Instance.new("Frame")
+    overlay.Name = "PriceOverlay"
+    overlay.Size = UDim2.new(1,0,0.3,0)
+    overlay.Position = UDim2.new(0,0,0.7,0)
+    overlay.BackgroundTransparency = 1
+    overlay.ZIndex = 10
+    overlay.Visible = false
+    local lbl = Instance.new("TextLabel")
+    lbl.Name = "PriceText"
+    lbl.Size = UDim2.new(1,0,1,0)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = Color3.fromRGB(0,255,0)
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextSize = 20
+    lbl.ZIndex = 11
+    lbl.Text = ""
+    lbl.Parent = overlay
+    overlay.Parent = button
+    return overlay
+end
+local function clearMapping(button, tool)
+    if button then buttonToTool[button] = nil end
+    if tool then toolToButton[tool] = nil end
+    if button then
+        local old = button:FindFirstChild("PriceOverlay")
+        if old then 
+            old:Destroy()
+        end
+    end
+end
+local function destroyAllOverlays()
+    for button, _ in pairs(buttonToTool) do
+        local overlay = button:FindFirstChild("PriceOverlay")
+        if overlay then
+            overlay:Destroy()
+        end
+    end
+end
+local function refreshPriceOverlay(button)
+    if not getgenv().Day2044.ShowPrice then
+        local old = button:FindFirstChild("PriceOverlay")
+        if old then 
+            old:Destroy()
+        end
+        return
+    end
+    local txt = button:FindFirstChildWhichIsA("TextLabel", true)
+    if not txt then return end
+    local btnWeight, btnName = txt.Text:match("%[(.-)kg%]"), normalizeName(txt.Text)
+    if not btnWeight or btnName == "" then
+        clearMapping(button, buttonToTool[button])
+        return
+    end
+    local tool = buttonToTool[button]
+    if tool and (tool.Parent ~= Backpack and tool.Parent ~= LocalPlayer.Character) then
+        clearMapping(button, tool)
+        tool = nil
+    end
+    if tool then
+        local toolWeight = tool.Name:match("%[(.-)kg%]")
+        local toolName = normalizeName(tool.Name)
+        if toolName ~= btnName or toolWeight ~= btnWeight then
+            clearMapping(button, tool)
+            tool = nil
+        end
+    end
+    if not tool then
+        for _, t in ipairs(Backpack:GetChildren()) do
+            if not toolToButton[t] then
+                local toolWeight = t.Name:match("%[(.-)kg%]")
+                local toolName = normalizeName(t.Name)
+                if toolName == btnName and toolWeight == btnWeight then
+                    tool = t
+                    buttonToTool[button] = t
+                    toolToButton[t] = button
+                    break
+                end
+            end
+        end
+        if not tool then
+            for _, t in ipairs(LocalPlayer.Character:GetChildren()) do
+                if t:IsA("Tool") then
+                    local toolWeight = t.Name:match("%[(.-)kg%]")
+                    local toolName = normalizeName(t.Name)
+                    if toolName == btnName and toolWeight == btnWeight then
+                        tool = t
+                        buttonToTool[button] = t
+                        toolToButton[t] = button
+                        break
+                    end
+                end
+            end
+        end
+    end
+    if not tool then return end
+    local price = 0
+    if tool:GetAttribute("Plant") and tool:GetAttribute("Price") then
+        price = calculatePlantPrice(tool)
+    elseif tool:GetAttribute("Brainrot") then
+        price = calculateBrainrotWorth(tool)
+    else
+        return
+    end
+    local overlay = getOrCreateOverlay(button)
+    overlay.PriceText.Text = "$"..price
+    overlay.Visible = true
+end
+function refreshAllOverlays()
+    if not getgenv().Day2044.ShowPrice then
+        destroyAllOverlays()
+        return
+    end
+    
+    for btn, _ in pairs(buttonToTool) do
+        refreshPriceOverlay(btn)
+    end
+end
+local function setupBtn(btn)
+    refreshPriceOverlay(btn)
+    for _, sub in ipairs(btn:GetDescendants()) do
+        if sub:IsA("TextLabel") then
+            sub:GetPropertyChangedSignal("Text"):Connect(function()
+                refreshPriceOverlay(btn)
+            end)
+        end
+    end
+    btn.AncestryChanged:Connect(function(_, parent)
+        local tool = buttonToTool[btn]
+        if not parent then
+            if tool then clearMapping(btn, tool) end
+        else
+            if tool then clearMapping(btn, tool) end
+            task.wait(0.1)
+            refreshPriceOverlay(btn)
+        end
+    end)
+end
+local function setupContainer(container)
+    for _, btn in ipairs(container:GetChildren()) do
+        if btn:IsA("TextButton") or btn:IsA("ImageButton") then
+            setupBtn(btn)
+        end
+    end
+    container.ChildAdded:Connect(function(obj)
+        task.wait(0.1)
+        if obj:IsA("TextButton") or obj:IsA("ImageButton") then
+            setupBtn(obj)
+        end
+    end)
+end
+local backpackGui = PlayerGui:WaitForChild("BackpackGui")
+setupContainer(backpackGui.Backpack.Inventory.ScrollingFrame.UIGridFrame)
+setupContainer(backpackGui.Backpack.Hotbar)
