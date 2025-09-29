@@ -1,3 +1,4 @@
+-- ✅ กันไม่ให้ Day2044 กลายเป็น function หรือค่าอื่น
 if type(getgenv().Day2044) ~= "table" then
     getgenv().Day2044 = { _ShowPrice = true }
 end
@@ -15,10 +16,8 @@ local settingsMeta = {
         if k == "ShowPrice" then
             local oldValue = rawget(t, "_ShowPrice")
             rawset(t, "_ShowPrice", v)
-            if oldValue ~= v then
-                if refreshAllOverlays then
-                    refreshAllOverlays()
-                end
+            if oldValue ~= v and refreshAllOverlays then
+                refreshAllOverlays()
             end
         else
             rawset(t, k, v)
@@ -26,23 +25,32 @@ local settingsMeta = {
     end
 }
 
--- เซ็ต metatable แค่ครั้งเดียว
-if not getmetatable(settings) then
-    setmetatable(settings, settingsMeta)
-end
+-- ✅ ใส่ metatable แค่ครั้งเดียว
+pcall(function()
+    if not getmetatable(settings) then
+        setmetatable(settings, settingsMeta)
+    end
+end)
+
+-- 📦 Services & Modules
 local ReplicatedStorage, Players = game:GetService("ReplicatedStorage"), game:GetService("Players")
 local LocalPlayer, Backpack, PlayerGui = Players.LocalPlayer, Players.LocalPlayer.Backpack, Players.LocalPlayer:WaitForChild("PlayerGui")
+
 local Modules = {
-    PlantMutations   = require(ReplicatedStorage.Modules.Utility.Parent.Library.PlantMutations),
-    BrainrotMutations= require(ReplicatedStorage.Modules.Utility.Parent.Library.BrainrotMutations),
-    BossParams       = require(ReplicatedStorage.Modules.Utility.Parent.Library.BossParams),
-    Util             = require(ReplicatedStorage.Modules.Utility.Util),
+    PlantMutations    = require(ReplicatedStorage.Modules.Utility.Parent.Library.PlantMutations),
+    BrainrotMutations = require(ReplicatedStorage.Modules.Utility.Parent.Library.BrainrotMutations),
+    BossParams        = require(ReplicatedStorage.Modules.Utility.Parent.Library.BossParams),
+    Util              = require(ReplicatedStorage.Modules.Utility.Util),
 }
+
+-- 🔎 Utility
 local function normalizeName(name) return name:gsub("%[.-%]%s*", "") end
+
 local function calculatePlantPrice(tool)
     local info = Modules.Util:GetMutationInfoFromMutations(tool:GetAttributes())
     return math.round((tool:GetAttribute("Price") or 0) * math.max(info.valueMultiplier or 1, 1))
 end
+
 local function calculateBrainrotWorth(tool)
     local asset = ReplicatedStorage.Assets.Brainrots:FindFirstChild(normalizeName(tool.Name))
     if not asset then return 0 end
@@ -56,12 +64,14 @@ local function calculateBrainrotWorth(tool)
     end
     return math.floor(worth * math.max((tool:GetAttribute("Size") or 1) / 1.25, 1))
 end
+
+-- 🏷 Overlay Management
 local buttonToTool, toolToButton = {}, {}
+
 local function getOrCreateOverlay(button)
     local overlay = button:FindFirstChild("PriceOverlay")
-    if overlay then
-        return overlay
-    end
+    if overlay then return overlay end
+
     overlay = Instance.new("Frame")
     overlay.Name = "PriceOverlay"
     overlay.Size = UDim2.new(1,0,0.3,0)
@@ -69,6 +79,7 @@ local function getOrCreateOverlay(button)
     overlay.BackgroundTransparency = 1
     overlay.ZIndex = 10
     overlay.Visible = false
+
     local lbl = Instance.new("TextLabel")
     lbl.Name = "PriceText"
     lbl.Size = UDim2.new(1,0,1,0)
@@ -79,42 +90,43 @@ local function getOrCreateOverlay(button)
     lbl.ZIndex = 11
     lbl.Text = ""
     lbl.Parent = overlay
+
     overlay.Parent = button
     return overlay
 end
+
 local function clearMapping(button, tool)
     if button then buttonToTool[button] = nil end
     if tool then toolToButton[tool] = nil end
     if button then
         local old = button:FindFirstChild("PriceOverlay")
-        if old then 
-            old:Destroy()
-        end
+        if old then old:Destroy() end
     end
 end
+
 local function destroyAllOverlays()
     for button, _ in pairs(buttonToTool) do
         local overlay = button:FindFirstChild("PriceOverlay")
-        if overlay then
-            overlay:Destroy()
-        end
+        if overlay then overlay:Destroy() end
     end
 end
+
 local function refreshPriceOverlay(button)
     if not getgenv().Day2044.ShowPrice then
         local old = button:FindFirstChild("PriceOverlay")
-        if old then 
-            old:Destroy()
-        end
+        if old then old:Destroy() end
         return
     end
+
     local txt = button:FindFirstChildWhichIsA("TextLabel", true)
     if not txt then return end
+
     local btnWeight, btnName = txt.Text:match("%[(.-)kg%]"), normalizeName(txt.Text)
     if not btnWeight or btnName == "" then
         clearMapping(button, buttonToTool[button])
         return
     end
+
     local tool = buttonToTool[button]
     if tool and (tool.Parent ~= Backpack and tool.Parent ~= LocalPlayer.Character) then
         clearMapping(button, tool)
@@ -157,6 +169,7 @@ local function refreshPriceOverlay(button)
         end
     end
     if not tool then return end
+
     local price = 0
     if tool:GetAttribute("Plant") and tool:GetAttribute("Price") then
         price = calculatePlantPrice(tool)
@@ -165,20 +178,24 @@ local function refreshPriceOverlay(button)
     else
         return
     end
+
     local overlay = getOrCreateOverlay(button)
     overlay.PriceText.Text = "$"..price
     overlay.Visible = true
 end
+
+-- 🔄 Refresh
 function refreshAllOverlays()
     if not getgenv().Day2044.ShowPrice then
         destroyAllOverlays()
         return
     end
-    
     for btn, _ in pairs(buttonToTool) do
         refreshPriceOverlay(btn)
     end
 end
+
+-- ⚙️ Setup
 local function setupBtn(btn)
     refreshPriceOverlay(btn)
     for _, sub in ipairs(btn:GetDescendants()) do
@@ -199,6 +216,7 @@ local function setupBtn(btn)
         end
     end)
 end
+
 local function setupContainer(container)
     for _, btn in ipairs(container:GetChildren()) do
         if btn:IsA("TextButton") or btn:IsA("ImageButton") then
@@ -212,6 +230,8 @@ local function setupContainer(container)
         end
     end)
 end
+
+-- 🚀 Init
 local backpackGui = PlayerGui:WaitForChild("BackpackGui")
 setupContainer(backpackGui.Backpack.Inventory.ScrollingFrame.UIGridFrame)
 setupContainer(backpackGui.Backpack.Hotbar)
