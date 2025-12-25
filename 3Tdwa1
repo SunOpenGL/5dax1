@@ -1,1 +1,88 @@
 
+-- =====================================================
+-- SERVICES
+-- =====================================================
+local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
+local CoreGui = game:GetService("CoreGui")
+local GuiService = game:GetService("GuiService")
+
+local player = Players.LocalPlayer
+
+-- =====================================================
+-- GLOBAL STATE (PERSIST)
+-- =====================================================
+getgenv().AUTO_REJOIN = getgenv().AUTO_REJOIN or false
+
+local TARGET_PLACE = 129009554587176
+local BAIT_PLACE   = 76558904092080
+
+-- =====================================================
+-- QUEUE HANDLER (RE-QUEUE SAFE)
+-- =====================================================
+local function queueCheck()
+    queueonteleport([[
+        repeat task.wait(0.5) until game:IsLoaded()
+
+        local TARGET_PLACE = 129009554587176
+        local BAIT_PLACE   = 76558904092080
+
+        print("🔁 [QUEUE] Loaded")
+        print("📍 PlaceId:", game.PlaceId)
+        print("♻ AUTO_REJOIN:", tostring(getgenv().AUTO_REJOIN))
+
+        -- ถ้ามา World 1 → ยังไม่จบ → queue ต่อ
+        if game.PlaceId == BAIT_PLACE then
+            print("🌀 อยู่ World 1 (bait) → queue รอรอบถัดไป")
+            queueonteleport(game:HttpGet("https://raw.githubusercontent.com/SunOpenGL/5dax1/refs/heads/main/3Tdwa1")) -- ดูหมายเหตุด้านล่าง
+            return
+        end
+
+        -- ถ้ากลับโลกจริง
+        if game.PlaceId == TARGET_PLACE then
+            print("✅ Rejoin สำเร็จ กลับมา World 2 แล้ว")
+            getgenv().AUTO_REJOIN = false
+        end
+    ]])
+end
+
+-- =====================================================
+-- REJOIN FUNCTION
+-- =====================================================
+local function forceRejoin()
+    if getgenv().AUTO_REJOIN then return end
+
+    getgenv().AUTO_REJOIN = true
+    print("🔄 Force Rejoin → Teleport ไป World 1")
+
+    queueCheck()
+    TeleportService:Teleport(BAIT_PLACE, player)
+end
+
+-- =====================================================
+-- ERROR / KICK DETECT
+-- =====================================================
+pcall(function()
+    CoreGui.RobloxPromptGui.promptOverlay.ChildAdded:Connect(function(child)
+        if child.Name == "ErrorPrompt" or child.Name == "KickPrompt" then
+            warn("⚠️ Error / Kick detected")
+            forceRejoin()
+        end
+    end)
+end)
+
+GuiService.ErrorMessageChanged:Connect(function()
+    warn("⚠️ ErrorMessageChanged detected")
+    forceRejoin()
+end)
+
+-- =====================================================
+-- ENTRY
+-- =====================================================
+repeat task.wait() until game:IsLoaded()
+print("🌍 Game Loaded:", game.PlaceId)
+
+if game.PlaceId ~= TARGET_PLACE then
+    getgenv().AUTO_REJOIN = true
+    queueCheck()
+end
